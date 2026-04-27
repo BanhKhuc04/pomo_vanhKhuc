@@ -13,7 +13,7 @@ export default function SessionTabs() {
   const { mode, switchMode } = usePomo()
 
   return (
-    <div className="flex items-center justify-center gap-2 w-full">
+    <div className="grid grid-cols-3 gap-3.5 w-full max-w-[980px]">
       {TABS.map(t => {
         const isActive = mode === t.mode
         return (
@@ -22,14 +22,14 @@ export default function SessionTabs() {
             onClick={() => switchMode(t.mode)}
             aria-label={`Switch to ${MODE_LABELS[t.mode]}`}
             className={clsx(
-              'pixel-text text-[9px] sm:text-[10px] flex items-center justify-center gap-2 px-4 py-2 border rounded-md uppercase transition-colors whitespace-nowrap min-w-[100px]',
+              'pixel-text text-[10px] sm:text-[11px] flex items-center justify-center gap-2 px-4 py-3.5 border rounded-xl uppercase transition-all whitespace-nowrap min-w-0',
               isActive
-                ? 'text-white border-vio bg-panelDeep'
-                : 'text-textMuted border-panelBorder bg-panel hover:bg-panelDeep hover:text-textMain'
+                ? 'text-white border-[#9B7CFF] bg-gradient-to-b from-[#6339D8] to-[#492DA9]'
+                : 'text-[#B8AFDA] border-panelBorder bg-[#111230] hover:bg-[#17173B] hover:text-textMain'
             )}
-            style={isActive ? { boxShadow: '0 0 10px rgba(139, 92, 246, 0.2)' } : {}}
+            style={isActive ? { boxShadow: '0 0 0 1px rgba(198,169,255,0.34), 0 14px 34px rgba(88,61,205,0.46)' } : { boxShadow: 'inset 0 0 0 1px rgba(76,61,137,0.22)' }}
           >
-            <span className="text-sm">{t.emoji}</span>
+            <span className="text-[14px]">{t.emoji}</span>
             <span>{t.label}</span>
           </button>
         )

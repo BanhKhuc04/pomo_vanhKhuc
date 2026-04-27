@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { HAIR_COLOR_HEX, OUTFIT_COLOR_HEX, SKIN_HEX } from '../../data/characterOptions'
+import { HAIR_COLOR_HEX, OUTFIT_COLOR_HEX, SKIN_HEX, SKIN_TONE_HEX } from '../../data/characterOptions'
 import { getAvatarAssetPaths, AVATAR_LAYER_TRANSFORMS } from '../../data/avatarAssets'
 
 /**
@@ -26,7 +26,7 @@ const SIZES = {
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
 const DARK_BORDER = '#0D0B1A'
-const SKIN        = SKIN_HEX
+const DEFAULT_SKIN = SKIN_HEX
 const EYE_COLOR   = '#1A1A2E'
 const PANTS_COLOR = '#1E1B4B'
 const SHOE_COLOR  = '#17142B'
@@ -178,7 +178,7 @@ function GlassesLayer({ glasses, W, H, border }) {
   )
 }
 
-function OutfitLayer({ outfit, outfitColor, bodyW, bodyH, bodyTop, bodyX, border }) {
+function OutfitLayer({ outfit, outfitColor, bodyW, bodyH, bodyTop, bodyX, border, skin }) { 
   const col    = OUTFIT_COLOR_HEX[outfitColor] || OUTFIT_COLOR_HEX.purple
   const dark   = darken(col, 35)
   const light  = lighten(col, 20)
@@ -203,16 +203,16 @@ function OutfitLayer({ outfit, outfitColor, bodyW, bodyH, bodyTop, bodyX, border
         <div style={{ position:'absolute', bottom:0, left:0, right:0, height: H*0.08, background: dark }} />
       </>
     )
-  } else if (outfit === 'tshirt') {
-    inner = (
-      <>
-        <div style={{ position:'absolute', inset:0, background: col }} />
-        <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width: W*0.25, height: H*0.20, background: SKIN, clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }} />
-        <div style={{ position:'absolute', top: H*0.05, left: -W*0.01, width: W*0.14, height: H*0.25, background: dark }} />
-        <div style={{ position:'absolute', top: H*0.05, right: -W*0.01, width: W*0.14, height: H*0.25, background: dark }} />
-      </>
-    )
-  } else if (outfit === 'sweater') {
+  } else if (outfit === 'tshirt') { 
+    inner = ( 
+      <> 
+        <div style={{ position:'absolute', inset:0, background: col }} /> 
+        <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width: W*0.25, height: H*0.20, background: skin, clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }} /> 
+        <div style={{ position:'absolute', top: H*0.05, left: -W*0.01, width: W*0.14, height: H*0.25, background: dark }} /> 
+        <div style={{ position:'absolute', top: H*0.05, right: -W*0.01, width: W*0.14, height: H*0.25, background: dark }} /> 
+      </> 
+    ) 
+  } else if (outfit === 'sweater') { 
     inner = (
       <>
         <div style={{ position:'absolute', inset:0, background: col }} />
@@ -258,24 +258,27 @@ function AccessoryLayer({ accessory, W, H, border, bodyTop, bodyX, BODY_W, ARM_W
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
-export default function AvatarCharacter({ 
-  config: incomingConfig, 
-  animationState = 'idle', 
-  size = 'md', 
-  useAssets = true,
-  onAssetStatusChange 
-}) {
-  const shouldReduceMotion = useReducedMotion()
-  const config = incomingConfig || {}
-  const sz = SIZES[size] || SIZES.md
-  const { W, H, head: HEAD_W, body: BODY_W, arm: ARM_W, border: BORDER } = sz
+export default function AvatarCharacter({  
+  config: incomingConfig,  
+  animationState = 'idle',  
+  size = 'md',  
+  useAssets = true, 
+  onAssetStatusChange  
+}) { 
+  const shouldReduceMotion = useReducedMotion() 
+  const config = incomingConfig || {} 
+  const sz = SIZES[size] || SIZES.md 
+  const { W, H, head: HEAD_W, body: BODY_W, arm: ARM_W, border: BORDER } = sz 
 
-  const hairStyle   = config.hairStyle   || 'messy'
-  const hairColor   = config.hairColor   || 'black'
-  const glasses     = config.glasses     || 'none'
-  const outfit      = config.outfit      || 'hoodie'
-  const outfitColor = config.outfitColor || 'purple'
-  const accessory   = config.accessory   || 'none'
+  const skinTone   = config.skinTone   || 'peach'
+  const hairStyle   = config.hairStyle   || 'messy' 
+  const hairColor   = config.hairColor   || 'black' 
+  const glasses     = config.glasses     || 'none' 
+  const outfit      = config.outfit      || 'hoodie' 
+  const outfitColor = config.outfitColor || 'purple' 
+  const accessory   = config.accessory   || 'none' 
+
+  const skin = SKIN_TONE_HEX[skinTone] || DEFAULT_SKIN
 
   const HEAD_H  = HEAD_W * 0.92
   const BODY_H  = BODY_W * 0.75
@@ -335,7 +338,7 @@ export default function AvatarCharacter({
         <AssetLayer name="base" src={assets.base} zIndex={1} onStatusChange={onAssetStatusChange} transform={AVATAR_LAYER_TRANSFORMS?.base} fallback={
           <>
             {/* Head/Skin */}
-            <div style={{ position:'absolute', top: H*0.01, left: headX, width: HEAD_W, height: HEAD_H, background: SKIN, border: `${BORDER}px solid ${DARK_BORDER}`, zIndex: 2 }}>
+            <div style={{ position:'absolute', top: H*0.01, left: headX, width: HEAD_W, height: HEAD_H, background: skin, border: `${BORDER}px solid ${DARK_BORDER}`, zIndex: 2 }}>
               <motion.div animate={blinkAnim.animate} transition={blinkAnim.transition} style={{ position:'absolute', top:'38%', left:0, right:0, display:'flex', justifyContent:'space-around', padding:`0 ${HEAD_W*0.14}px`, transformOrigin:'center' }}>
                 <div style={{ width:Math.max(2,HEAD_W*0.14), height:Math.max(2,HEAD_W*0.14), background:EYE_COLOR }} />
                 <div style={{ width:Math.max(2,HEAD_W*0.14), height:Math.max(2,HEAD_W*0.14), background:EYE_COLOR }} />
@@ -344,14 +347,14 @@ export default function AvatarCharacter({
             </div>
 
             {/* Neck */}
-            <div style={{ position:'absolute', top: H*0.01 + HEAD_H - 1, left: (W - HEAD_W*0.32)/2, width: HEAD_W*0.32, height: Math.max(3, H*0.04), background: SKIN, border: `${Math.max(1,BORDER*0.7)}px solid ${DARK_BORDER}`, zIndex: 1 }} />
+            <div style={{ position:'absolute', top: H*0.01 + HEAD_H - 1, left: (W - HEAD_W*0.32)/2, width: HEAD_W*0.32, height: Math.max(3, H*0.04), background: skin, border: `${Math.max(1,BORDER*0.7)}px solid ${DARK_BORDER}`, zIndex: 1 }} />
 
             {/* Arms */}
             <motion.div animate={!noMotion && animationState === 'typing' ? { rotate:[-8,4,-8] } : { rotate:0 }} transition={{ duration:0.2, repeat:animationState==='typing'?Infinity:0 }} style={{ position:'absolute', top: bodyTop + BODY_H*0.1, left: bodyX - ARM_W + BORDER, width: ARM_W, height: ARM_H, background: outfitBg, border: `${BORDER}px solid ${DARK_BORDER}`, transformOrigin: 'top center', zIndex:1 }}>
-              <div style={{ position:'absolute', bottom:-Math.max(2,BORDER), left:'15%', width: ARM_W*0.7, height: Math.max(3,ARM_W*0.35), background:SKIN, border:`${Math.max(1,BORDER*0.6)}px solid ${DARK_BORDER}` }} />
+              <div style={{ position:'absolute', bottom:-Math.max(2,BORDER), left:'15%', width: ARM_W*0.7, height: Math.max(3,ARM_W*0.35), background:skin, border:`${Math.max(1,BORDER*0.6)}px solid ${DARK_BORDER}` }} />
             </motion.div>
             <motion.div animate={!noMotion && animationState === 'typing' ? { rotate:[8,-4,8] } : { rotate:0 }} transition={{ duration:0.2, repeat:animationState==='typing'?Infinity:0, delay:0.1 }} style={{ position:'absolute', top: bodyTop + BODY_H*0.1, left: bodyX + BODY_W - BORDER, width: ARM_W, height: ARM_H, background: outfitBg, border: `${BORDER}px solid ${DARK_BORDER}`, transformOrigin: 'top center', zIndex:1 }}>
-              <div style={{ position:'absolute', bottom:-Math.max(2,BORDER), left:'15%', width: ARM_W*0.7, height: Math.max(3,ARM_W*0.35), background:SKIN, border:`${Math.max(1,BORDER*0.6)}px solid ${DARK_BORDER}` }} />
+              <div style={{ position:'absolute', bottom:-Math.max(2,BORDER), left:'15%', width: ARM_W*0.7, height: Math.max(3,ARM_W*0.35), background:skin, border:`${Math.max(1,BORDER*0.6)}px solid ${DARK_BORDER}` }} />
             </motion.div>
 
             {/* Legs */}
@@ -368,7 +371,7 @@ export default function AvatarCharacter({
 
         {/* ════ [LAYER: OUTFIT] ════ */}
         <AssetLayer name="outfit" src={assets.outfit} zIndex={2} onStatusChange={onAssetStatusChange} transform={AVATAR_LAYER_TRANSFORMS?.outfit} fallback={
-          <OutfitLayer outfit={outfit} outfitColor={outfitColor} bodyW={BODY_W} bodyH={BODY_H} bodyTop={bodyTop} bodyX={bodyX} border={BORDER} />
+          <OutfitLayer outfit={outfit} outfitColor={outfitColor} bodyW={BODY_W} bodyH={BODY_H} bodyTop={bodyTop} bodyX={bodyX} border={BORDER} skin={skin} />
         } />
 
         {/* ════ [LAYER: HAIR] ════ */}

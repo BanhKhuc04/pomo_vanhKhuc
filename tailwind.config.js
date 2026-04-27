@@ -37,7 +37,8 @@ export default {
       },
       fontFamily: {
         pixel: ['"Press Start 2P"', 'monospace'],
-        retro: ['"VT323"', 'monospace']
+        retro: ['"VT323"', 'monospace'],
+        app: ['"Nunito"', 'ui-sans-serif', 'system-ui']
       },
       boxShadow: {
         pixel: '4px 4px 0 0 rgba(58, 46, 46, 1)',

@@ -1,5 +1,4 @@
 import React from 'react'
-import { motion } from 'framer-motion'
 import { usePomo } from '../../context/PomoContext'
 
 export default function StreakBadge({ compact = false }) {
@@ -8,10 +7,10 @@ export default function StreakBadge({ compact = false }) {
 
   return (
     <div
-      className="inline-flex items-center gap-2 border border-panelBorder rounded-md px-3 py-1.5 bg-panelDeep/50"
+      className="inline-flex items-center gap-2 border border-[#6D4B24] rounded-lg px-3 py-1.5 bg-[#1A1638] shadow-[inset_0_0_12px_rgba(251,191,36,0.14)]"
     >
-      <span className="text-sm">🔥</span>
-      <span className="pixel-text text-[10px] text-textMain tracking-tighter uppercase">
+      <span className="text-[14px] leading-none">🔥</span>
+      <span className="pixel-text text-[10px] text-[#FFD772] tracking-tight uppercase">
         {count} {count === 1 ? 'day' : 'days'}
       </span>
     </div>

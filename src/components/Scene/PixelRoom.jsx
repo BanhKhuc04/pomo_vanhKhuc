@@ -1,60 +1,43 @@
 import React from 'react'
-import clsx from 'clsx'
-import Window from './Window'
-import Furniture from './Furniture'
-import Pet from './Pet'
-import Candle from './Candle'
-import AvatarCharacter from '../Character/AvatarCharacter'
-import { usePomo } from '../../context/PomoContext'
-import { MODES } from '../../data/constants'
-
-/**
- * Derives animationState from Pomodoro state.
- * Priority: celebrate > typing (focus+running) > relax (break) > idle
- */
-function deriveAnimationState({ isRunning, mode, sessionJustCompleted }) {
-  if (sessionJustCompleted)                                    return 'celebrate'
-  if (isRunning && mode === MODES.FOCUS)                       return 'typing'
-  if (mode === MODES.SHORT_BREAK || mode === MODES.LONG_BREAK) return 'relax'
-  return 'idle'
-}
 
 export default function PixelRoom() {
-  const { isRunning, mode, sessionJustCompleted, characterConfig } = usePomo()
-  const animationState = deriveAnimationState({ isRunning, mode, sessionJustCompleted })
-
   return (
-    <div
-      className={clsx(
-        'relative w-full h-full overflow-hidden flex-none pointer-events-none',
-        'aspect-[16/9] lg:aspect-auto lg:h-full'
-      )}
-    >
-      {/* Background Image (Target Scene) */}
+    <div className="relative w-full h-full overflow-hidden pointer-events-none">
       <img
-        src="/images/scene/room-bg.png"
+        src="/images/scene/cozy-coder-room.png"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover object-center pixelated select-none opacity-20 scale-[1.04] blur-[1.5px]"
+      />
+      <img
+        src="/images/scene/cozy-coder-room.png"
         alt="Cozy Room"
-        className="absolute inset-0 w-full h-full object-cover pixelated"
+        className="absolute inset-0 w-full h-full object-cover object-center pixelated select-none"
       />
 
-      {/* ── Avatar Character ── */}
-      {/*
-       * Positioned so it sits in front of the desk in the background image.
-       */}
       <div
-        className="absolute z-20"
+        className="absolute inset-0"
         style={{
-          bottom: '22%',
-          left: '30%',
-          transform: 'scale(1.2)'
+          background:
+            'radial-gradient(circle at 18% 63%, rgba(255,176,102,0.14) 0%, rgba(255,176,102,0.04) 25%, rgba(0,0,0,0) 48%), radial-gradient(circle at 62% 19%, rgba(88,111,255,0.14) 0%, rgba(88,111,255,0.04) 26%, rgba(0,0,0,0) 58%)',
         }}
-      >
-        <AvatarCharacter
-          config={characterConfig}
-          animationState={animationState}
-          size="lg"
-        />
-      </div>
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(10,9,29,0.04) 0%, rgba(10,9,29,0.02) 42%, rgba(9,9,21,0.16) 100%)',
+        }}
+      />
+      <div className="absolute inset-0 border border-[#3F3676] rounded-[inherit] shadow-[inset_0_0_0_1px_rgba(82,66,150,0.32)]" />
+      <div className="absolute inset-0 rounded-[inherit]" style={{ boxShadow: 'inset 0 -34px 70px rgba(8,7,22,0.26), inset 0 18px 40px rgba(10,10,25,0.14)' }} />
+      <div
+        className="absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.24), rgba(255,255,255,0.24) 1px, transparent 1px, transparent 3px)',
+          mixBlendMode: 'screen',
+        }}
+      />
     </div>
   )
 }

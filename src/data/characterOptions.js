@@ -2,6 +2,7 @@
 
 export const DEFAULT_CHARACTER_CONFIG = {
   name: 'Coder',
+  skinTone: 'peach',
   hairStyle: 'messy',
   hairColor: 'black',
   glasses: 'round',
@@ -17,6 +18,7 @@ export function normalizeCharacterConfig(raw) {
   if (!raw || typeof raw !== 'object') return { ...defaults }
   return {
     name:        typeof raw.name === 'string' ? raw.name : defaults.name,
+    skinTone:    OPTION_IDS.skinTone.includes(raw.skinTone)    ? raw.skinTone    : defaults.skinTone,
     hairStyle:   OPTION_IDS.hairStyle.includes(raw.hairStyle)   ? raw.hairStyle   : defaults.hairStyle,
     hairColor:   OPTION_IDS.hairColor.includes(raw.hairColor)   ? raw.hairColor   : defaults.hairColor,
     glasses:     OPTION_IDS.glasses.includes(raw.glasses)       ? raw.glasses     : defaults.glasses,
@@ -29,6 +31,7 @@ export function normalizeCharacterConfig(raw) {
 
 // Valid IDs for each field (used in normalizer)
 export const OPTION_IDS = {
+  skinTone:    ['porcelain', 'peach', 'tan', 'deep'],
   hairStyle:   ['short', 'messy', 'side'],
   hairColor:   ['black', 'brown', 'blue'],
   glasses:     ['none', 'round', 'square'],
@@ -40,6 +43,12 @@ export const OPTION_IDS = {
 
 // UI display data for Character Setup Modal
 export const CHARACTER_OPTIONS = {
+  skinTone: [
+    { id: 'porcelain', label: 'Porcelain', hex: '#F6D7C9' },
+    { id: 'peach',     label: 'Peach',     hex: '#F3C6A6' },
+    { id: 'tan',       label: 'Tan',       hex: '#D9A57B' },
+    { id: 'deep',      label: 'Deep',      hex: '#A36A4F' },
+  ],
   hairStyle: [
     { id: 'short',  label: 'Short',  emoji: '💇' },
     { id: 'messy',  label: 'Messy',  emoji: '😤' },
@@ -91,4 +100,11 @@ export const OUTFIT_COLOR_HEX = {
   cream:  '#FDF4DC',
 }
 
-export const SKIN_HEX = '#F5CBA7' // fixed skin tone (can be a future option)
+export const SKIN_TONE_HEX = {
+  porcelain: '#F6D7C9',
+  peach:     '#F3C6A6',
+  tan:       '#D9A57B',
+  deep:      '#A36A4F',
+}
+
+export const SKIN_HEX = SKIN_TONE_HEX.peach
