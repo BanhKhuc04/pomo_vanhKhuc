@@ -1,0 +1,58 @@
+# POMO TIME - ICON LIST FOR AI GENERATION
+# Style: Pixel art 32x32, Stardew Valley cozy aesthetic, 8-bit palette (cream/wood/pink/mint/orange/lavender), transparent background, image-rendering: pixelated
+
+## 1. MAIN CHARACTERS (Priority High)
+- 👧 GIRL IDLE (neutral face, sitting pose)
+- 👧 STUDYING (holding pencil ✏️, writing motion) 
+- 👧 TEA BREAK (holding teacup ☕, relaxed smile)
+- 😴 SLEEPING (Zzz bubbles 💤 above head)
+- 🐱 CAT IDLE (curious pose, tail sway)
+- 🐈 CAT SLEEPING (curled up, Zzz 💤)
+
+## 2. FURNITURE & ITEMS
+- 📚 BOOKSTACK (3-4 colorful books)
+- 🪴 POTTED PLANT (small green plant swaying)
+- 🌸 WALL POSTER (flower frame)
+- 🕐 PIXEL CLOCK (retro analog clock)
+- 📖 OPEN BOOK (on desk)
+- ✏️ PENCIL (tilted writing angle)
+- ☕ TEA CUP (steaming)
+
+## 3. WINDOW ELEMENTS (Animated)
+- ☀️ SUN (with rays, morning glow)
+- 🌤️ CLOUD (fluffy pixel cloud)
+- 🐦 BIRD (flying silhouette)
+- 🌙 MOON (crescent with stars ⭐)
+- 🪰 FIREFLY (glowing dots)
+
+## 4. GAMIFICATION
+- 🌱 SEED (Garden stage 1)
+- 🌿 SPROUT (Garden stage 2) 
+- 🌸 FLOWER BLOOM (Garden stage 3, colors: pink/mint/orange)
+- 🔥 FLAME (Streak fire, animated flicker)
+- 🏆 TROPHY (gold shiny)
+- 🎉 ACHIEVEMENT STARBURST
+
+## 5. UI ELEMENTS
+- 🍅 TOMATO ICON (Pomo logo)
+- ⚙️ GEAR (Settings)
+- 🌙 MOON (Dark mode)
+- 🔇 MUTE (sound off)
+- 🎵 MUSIC NOTE (audio on)
+
+## COLOR PALETTE (strict):
+cream: #FFF5E1
+wood: #C9A57B 
+pink: #F8D7DA
+mint: #B8E0D2
+orange: #F4A261
+lavender: #D4C5E2
+night: #2D2B4E
+star: #FFE082
+ink: #3A2E2E
+
+## GENERATION PROMPT TEMPLATE:
+"Create [ICON NAME] pixel art sprite, 32x32 pixels, Stardew Valley style, cozy aesthetic, [COLOR DESCRIPTION], transparent background, sharp pixel edges, retro 8-bit game style"
+
+## OUTPUT FORMAT:
+PNG files named: girl-idle.png, cat-sleep.png, bookstack.png, etc.
