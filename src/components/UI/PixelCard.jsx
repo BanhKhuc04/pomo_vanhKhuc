@@ -1,25 +1,30 @@
 import React from 'react'
 import clsx from 'clsx'
 
+/**
+ * PixelCard — dark-first panel card with violet pixel border.
+ * accent variants preserved for backward-compat; dark mode now uses 
+ * the new #211D3F panel palette with panelBorder.
+ */
 export default function PixelCard({ children, className = '', title, accent = 'cream', ...rest }) {
   const accents = {
-    cream: 'bg-cream dark:bg-nightCard',
-    wood: 'bg-wood/30 dark:bg-purple-900',
-    pink: 'bg-pink dark:bg-rose-900/40',
-    mint: 'bg-mint dark:bg-emerald-900/40',
-    lavender: 'bg-lavender dark:bg-indigo-900/40'
+    cream: 'bg-panel dark:bg-panel',
+    wood: 'bg-wood/30 dark:bg-panelDeep',
+    pink: 'bg-pink dark:bg-panel',
+    mint: 'bg-mint dark:bg-panel',
+    lavender: 'bg-lavender dark:bg-panel',
   }
   return (
     <div
       className={clsx(
-        'pixel-border pixel-shadow no-rounded p-4',
+        'pixel-border pixel-shadow no-rounded p-3',
         accents[accent] || accents.cream,
         className
       )}
       {...rest}
     >
       {title && (
-        <h3 className="pixel-text text-xs sm:text-sm mb-3 text-ink dark:text-cream uppercase tracking-widest">
+        <h3 className="pixel-text text-[9px] sm:text-[10px] mb-2 text-textMain uppercase tracking-widest flex items-center gap-2">
           {title}
         </h3>
       )}

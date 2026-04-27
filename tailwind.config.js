@@ -21,7 +21,19 @@ export default {
         star: '#FFE082',
         // Semantic
         ink: '#3A2E2E',
-        inkLight: '#6B5B5B'
+        inkLight: '#6B5B5B',
+        // Coder Dashboard Dark Palette (Target UI)
+        void: '#0B0914',       // Absolute outer background
+        panel: '#151226',      // Main panel background
+        panelDeep: '#0F0C1B',  // Inner inputs and darker boxes
+        panelBorder: '#2A244A',// Soft visible borders
+        vio: '#8B5CF6',        // Violet highlight
+        vioDark: '#6D28D9',    // Violet deep
+        indigoDark: '#312E81', // Indigo muted
+        neonPink: '#EC4899',
+        amber: '#FBBF24',
+        textMain: '#FFF9F0',   // Creamy white text
+        textMuted: '#8B86A5',  // Lavender gray muted text
       },
       fontFamily: {
         pixel: ['"Press Start 2P"', 'monospace'],

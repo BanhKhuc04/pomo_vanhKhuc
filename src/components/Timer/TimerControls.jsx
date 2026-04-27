@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Play, Pause, RotateCcw } from 'lucide-react'
-import PixelButton from '../UI/PixelButton'
 import { usePomo } from '../../context/PomoContext'
+import clsx from 'clsx'
 
 export default function TimerControls() {
   const { isRunning, toggleTimer, resetTimer } = usePomo()
@@ -9,39 +9,44 @@ export default function TimerControls() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKey = (e) => {
-      // Avoid firing while typing in inputs
       const tag = e.target?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
-      if (e.code === 'Space') {
-        e.preventDefault()
-        toggleTimer()
-      } else if (e.key === 'r' || e.key === 'R') {
-        resetTimer()
-      }
+      if (e.code === 'Space') { e.preventDefault(); toggleTimer() }
+      else if (e.key === 'r' || e.key === 'R') resetTimer()
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
   }, [toggleTimer, resetTimer])
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-2">
-      <PixelButton
-        variant="primary"
-        size="lg"
+    <div className="flex items-center justify-center gap-4 mt-2 w-[80%] max-w-[300px]">
+      {/* START / PAUSE — main CTA */}
+      <button
         onClick={toggleTimer}
-        ariaLabel={isRunning ? 'Pause timer' : 'Start timer'}
-        className="min-w-[140px]"
+        aria-label={isRunning ? 'Pause timer' : 'Start timer'}
+        className={clsx(
+          'pixel-text text-[11px] sm:text-xs flex items-center justify-center gap-2 py-3.5 rounded-md uppercase w-full flex-1',
+          'transition-all duration-100 active:scale-95',
+          'text-white bg-vioDark hover:bg-vio border border-vio shadow-[0_0_15px_rgba(124,58,237,0.3)]',
+        )}
       >
-        {isRunning ? <><Pause size={18} /> Pause</> : <><Play size={18} /> Start</>}
-      </PixelButton>
-      <PixelButton
-        variant="ghost"
-        size="lg"
+        {isRunning
+          ? <><Pause size={16} fill="currentColor" /> Pause</>
+          : <><Play  size={16} fill="currentColor" /> Start</>}
+      </button>
+
+      {/* RESET — secondary */}
+      <button
         onClick={resetTimer}
-        ariaLabel="Reset timer"
+        aria-label="Reset timer"
+        className={clsx(
+          'pixel-text text-[11px] sm:text-xs flex items-center justify-center gap-2 py-3.5 rounded-md uppercase flex-1',
+          'transition-all duration-100 active:scale-95',
+          'text-textMuted border border-panelBorder bg-transparent hover:text-textMain hover:border-textMuted',
+        )}
       >
-        <RotateCcw size={18} /> Reset
-      </PixelButton>
+        <RotateCcw size={14} /> Reset
+      </button>
     </div>
   )
 }

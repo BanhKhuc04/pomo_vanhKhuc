@@ -7,16 +7,16 @@ export default function SessionCounter() {
   const { completedFocusInCycle } = usePomo()
   return (
     <div className="flex items-center gap-2 justify-center">
-      <span className="retro-text text-base text-ink/70 dark:text-cream/70">Cycle:</span>
+      <span className="retro-text text-sm text-textMuted">Cycle:</span>
       <div className="flex gap-1.5">
         {Array.from({ length: SESSIONS_BEFORE_LONG }).map((_, i) => (
           <div
             key={i}
             className={clsx(
-              'w-4 h-4 pixel-border-thick',
+              'w-4 h-4 border-2',
               i < completedFocusInCycle
-                ? 'bg-orange dark:bg-star'
-                : 'bg-cream dark:bg-nightCard'
+                ? 'border-amber bg-amber'
+                : 'border-panelBorder bg-panelDeep'
             )}
           />
         ))}

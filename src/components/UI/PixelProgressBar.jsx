@@ -3,24 +3,26 @@ import clsx from 'clsx'
 
 /**
  * Pixel chunk progress bar.
- * Shows N chunks filled based on progress 0-1.
+ * Shows N chunks filled based on progress 0–1.
  */
-export default function PixelProgressBar({ progress = 0, chunks = 20, color = 'orange', className = '' }) {
+export default function PixelProgressBar({ progress = 0, chunks = 19, color = 'violet', className = '' }) {
   const filled = Math.round(progress * chunks)
   const colors = {
-    orange: 'bg-orange dark:bg-star',
-    mint: 'bg-mint dark:bg-emerald-400',
-    pink: 'bg-pink dark:bg-rose-400',
-    blue: 'bg-nightAccent'
+    violet: 'bg-vio',
+    orange: 'bg-orange dark:bg-amber',
+    mint:   'bg-mint dark:bg-emerald-400',
+    pink:   'bg-neonPink',
+    blue:   'bg-indigoDark',
+    amber:  'bg-amber',
   }
   return (
-    <div className={clsx('pixel-border pixel-shadow-sm no-rounded bg-cream dark:bg-night p-1 flex gap-[2px] w-full', className)}>
+    <div className={clsx('border-2 border-panelBorder no-rounded bg-panelDeep p-[3px] flex gap-[2px] w-full', className)}>
       {Array.from({ length: chunks }).map((_, i) => (
         <div
           key={i}
           className={clsx(
-            'flex-1 h-4 sm:h-5 transition-colors duration-200',
-            i < filled ? colors[color] : 'bg-wood/30 dark:bg-purple-900'
+            'flex-1 h-3 sm:h-4 transition-colors duration-300',
+            i < filled ? (colors[color] ?? colors.violet) : 'bg-panelBorder/30'
           )}
         />
       ))}

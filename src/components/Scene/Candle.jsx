@@ -3,28 +3,29 @@ import { motion } from 'framer-motion'
 import { usePomo } from '../../context/PomoContext'
 import { MODES } from '../../data/constants'
 
+/**
+ * Desk lamp candle replacement — shows flame flicker during focus.
+ * In coder room: we replaced candle with a neon LED strip instead.
+ * Kept for backward compat but now renders an ambient light strip.
+ */
 export default function Candle() {
   const { mode, isRunning } = usePomo()
   const lit = isRunning && mode === MODES.FOCUS
 
   return (
-    <div className="absolute right-3 sm:right-7 bottom-[28%] z-20 flex flex-col items-center">
-      {/* Flame */}
-      {lit && (
-        <motion.div
-          className="text-lg pixel-emoji"
-          animate={{
-            scale: [1, 1.2, 0.9, 1.1, 1],
-            opacity: [1, 0.9, 1, 0.85, 1]
-          }}
-          transition={{ duration: 0.6, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          🔥
-        </motion.div>
-      )}
-      {/* Candle body */}
-      <div className="w-3 h-6 bg-cream dark:bg-cream pixel-border-thick" />
-      <div className="w-5 h-2 bg-orange dark:bg-orangeDark pixel-border-thick -mt-[2px]" />
+    // LED strip along top-left of room (subtle ambient)
+    <div className="absolute left-0 top-0 w-full h-[3px] z-5 pointer-events-none">
+      <motion.div
+        className="h-full"
+        style={{
+          background: lit
+            ? 'linear-gradient(90deg, transparent 0%, #7C3AED60 20%, #4F46E580 50%, #7C3AED60 80%, transparent 100%)'
+            : 'transparent',
+          boxShadow: lit ? '0 2px 8px #7C3AED40' : 'none',
+        }}
+        animate={lit ? { opacity: [0.7, 1, 0.7] } : { opacity: 0 }}
+        transition={{ duration: 2, repeat: Infinity }}
+      />
     </div>
   )
 }

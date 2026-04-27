@@ -1,21 +1,19 @@
 import React from 'react'
 import { Sun, Moon } from 'lucide-react'
-import PixelButton from './PixelButton'
 import { usePomo } from '../../context/PomoContext'
 
 export default function ThemeToggle() {
   const { isDark, toggleTheme } = usePomo()
   return (
-    <PixelButton
-      variant="wood"
-      size="icon"
+    <button
       onClick={toggleTheme}
-      ariaLabel={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="!p-0"
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      className="w-8 h-8 flex items-center justify-center border-2 border-panelBorder hover:border-vio/60 transition-colors no-rounded"
+      style={{ background: '#17142B' }}
     >
       {isDark
-        ? <Sun size={20} className="text-star animate-pulse-fast" />
-        : <Moon size={20} className="text-ink" />}
-    </PixelButton>
+        ? <Sun size={16} className="text-amber" />
+        : <Moon size={16} className="text-textMuted" />}
+    </button>
   )
 }

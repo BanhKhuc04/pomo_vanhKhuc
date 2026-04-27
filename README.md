@@ -12,7 +12,7 @@ A cozy pixel-art Pomodoro Timer web app for students. Built with React 18 + Vite
 - 🏠 **Animated Pixel Scene** — Cozy room with character, pet cat, candle, bookshelf
 - 🌅 **Day/Night Window** — Sky changes based on real time of day
 - 🌙 **Dark Mode** — Manual toggle + auto switch (after 6 PM)
-- 🌱 **Garden Growth** — Plant grows for each completed Pomodoro (8 plots/day)
+- 🌱 **Garden Growth** — Plant grows for each completed Pomodoro (19 plots/day)
 - 🔥 **Daily Streak** — Track consecutive study days
 - 🏆 **6 Achievements** — First Bloom, Night Owl, Early Bird, Week Warrior, Study Master, Garden Keeper
 - 🎵 **Lo-fi Music + SFX** — Background music during focus, click sounds, bell on session end

@@ -10,6 +10,7 @@ import {
   SESSIONS_BEFORE_LONG, GARDEN_SIZE, PLANT_STAGES
 } from '../data/constants'
 import { todayKey, notify, requestNotificationPermission, formatTime } from '../utils/helpers'
+import { normalizeCharacterConfig } from '../data/characterOptions'
 
 const PomoContext = createContext(null)
 
@@ -55,9 +56,39 @@ export function PomoProvider({ children }) {
     }
     if (garden.date !== today) {
       setGarden(initialGarden())
+    } else if (garden.plots && garden.plots.length !== GARDEN_SIZE) {
+      // Migrate old garden (e.g. length 8) to new GARDEN_SIZE (19)
+      setGarden(prev => {
+        const newPlots = Array(GARDEN_SIZE).fill(PLANT_STAGES.EMPTY)
+        for (let i = 0; i < Math.min(prev.plots.length, GARDEN_SIZE); i++) {
+          newPlots[i] = prev.plots[i]
+        }
+        return { ...prev, plots: newPlots }
+      })
     }
     streakHook.checkExpiry()
     requestNotificationPermission()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const [tasks, setTasks] = useLocalStorage(STORAGE_KEYS.TASKS || 'pomo_tasks', [])
+  const [activeTaskId, setActiveTaskId] = useState(null)
+  const [dailyStats, setDailyStats] = useLocalStorage('pomo_daily_stats', {})
+  const [characterConfigRaw, setCharacterConfigRaw] = useLocalStorage('pomo_character', null)
+  const [sessionJustCompleted, setSessionJustCompleted] = useState(false)
+
+  // Normalize tasks on load
+  useEffect(() => {
+    if (tasks.length > 0) {
+      const needsUpdate = tasks.some(t => t.pomoCount === undefined)
+      if (needsUpdate) {
+        setTasks(prev => prev.map(t => ({
+          ...t,
+          pomoCount: t.pomoCount || 0,
+          createdAt: t.createdAt || new Date().toISOString()
+        })))
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -120,6 +151,31 @@ export function PomoProvider({ children }) {
         return { date: today, plots }
       })
 
+      // Increment pomoCount for active task
+      if (activeTaskId) {
+        setTasks(prev => prev.map(t => 
+          t.id === activeTaskId ? { ...t, pomoCount: (t.pomoCount || 0) + 1 } : t
+        ))
+      }
+
+      // Trigger celebrate animation (auto-clears after 2.5s)
+      setSessionJustCompleted(true)
+      setTimeout(() => setSessionJustCompleted(false), 2500)
+
+      // Record daily stats
+      setDailyStats(prev => {
+        const today = todayKey()
+        const current = prev[today] || { pomos: 0, minutes: 0, completedTasks: 0 }
+        return {
+          ...prev,
+          [today]: {
+            ...current,
+            pomos: current.pomos + 1,
+            minutes: current.minutes + focusMinutes
+          }
+        }
+      })
+
       // Update streak
       streakHook.recordStudy()
 
@@ -170,7 +226,7 @@ export function PomoProvider({ children }) {
       }
       setMode(MODES.FOCUS)
     }
-  }, [mode, settings, stats, sound, completedFocusInCycle, getNextMode, setStats, setGarden, streakHook, achievementsHook, pushToast])
+  }, [mode, settings, stats, sound, completedFocusInCycle, getNextMode, setStats, setGarden, streakHook, achievementsHook, pushToast, activeTaskId, setTasks, setDailyStats])
 
   // Tick handler (optional tick sound)
   const handleTick = useCallback((secondsLeft) => {
@@ -240,14 +296,13 @@ export function PomoProvider({ children }) {
     pushToast({ type: 'info', title: 'Reset Complete', message: 'All data cleared 🧹' })
   }, [setSettings, setStats, setGarden, streakHook, achievementsHook, pushToast])
 
-  const [tasks, setTasks] = useLocalStorage(STORAGE_KEYS.TASKS || 'pomo_tasks', [])
-
   const addTask = useCallback((text) => {
     if (!text.trim()) return
     const newTask = {
       id: Date.now(),
       text,
       completed: false,
+      pomoCount: 0,
       createdAt: new Date().toISOString()
     }
     setTasks(prev => [newTask, ...prev])
@@ -255,22 +310,49 @@ export function PomoProvider({ children }) {
   }, [setTasks, sound.play])
 
   const toggleTask = useCallback((id) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t))
+    setTasks(prev => prev.map(t => {
+      if (t.id === id) {
+        const isNowCompleted = !t.completed;
+        if (isNowCompleted && activeTaskId === id) setActiveTaskId(null);
+        
+        // Update dailyStats for completedTasks
+        setDailyStats(statsPrev => {
+          const today = todayKey();
+          const current = statsPrev[today] || { pomos: 0, minutes: 0, completedTasks: 0 };
+          return {
+            ...statsPrev,
+            [today]: {
+              ...current,
+              completedTasks: Math.max(0, (current.completedTasks || 0) + (isNowCompleted ? 1 : -1))
+            }
+          };
+        });
+
+        return { 
+          ...t, 
+          completed: isNowCompleted,
+          completedAt: isNowCompleted ? new Date().toISOString() : undefined
+        };
+      }
+      return t;
+    }))
     sound.play('CLICK')
-  }, [setTasks, sound.play])
+  }, [setTasks, sound.play, activeTaskId, setDailyStats])
 
   const deleteTask = useCallback((id) => {
+    if (activeTaskId === id) setActiveTaskId(null);
     setTasks(prev => prev.filter(t => t.id !== id))
     sound.play('CLICK')
-  }, [setTasks, sound.play])
+  }, [setTasks, sound.play, activeTaskId])
 
   const value = {
     // tasks
     tasks, addTask, toggleTask, deleteTask,
+    activeTaskId, setActiveTaskId,
     // settings
     settings, setSettings,
     // stats
-    stats,
+    stats, dailyStats,
     // garden
     garden,
     // streak
@@ -296,7 +378,11 @@ export function PomoProvider({ children }) {
     // toasts
     toasts, pushToast, removeToast,
     // utility
-    resetAllData
+    resetAllData,
+    // character
+    characterConfig: characterConfigRaw ? normalizeCharacterConfig(characterConfigRaw) : null,
+    saveCharacterConfig: (cfg) => setCharacterConfigRaw(cfg),
+    sessionJustCompleted,
   }
 
   return <PomoContext.Provider value={value}>{children}</PomoContext.Provider>

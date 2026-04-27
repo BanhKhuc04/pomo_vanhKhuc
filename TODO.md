@@ -1,7 +1,7 @@
 # TODO - Integrate 19 Images into Garden
 
 - [x] Create src/data/images.js (placeholder)
-- [ ] Update constants.js GARDEN_SIZE = 19
-- [ ] Update PomoContext.jsx garden logic for 19 plots
-- [ ] Update src/components/Stats/Garden.jsx to use images
-- [ ] Test garden with images
+- [x] Update constants.js GARDEN_SIZE = 19
+- [x] Update PomoContext.jsx garden logic for 19 plots
+- [x] Update src/components/Stats/Garden.jsx to use images
+- [x] Test garden with images

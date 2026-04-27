@@ -6,34 +6,40 @@ import { formatTime } from '../../utils/helpers'
 import PixelProgressBar from '../UI/PixelProgressBar'
 import { MODES, MODE_EMOJI, MODE_LABELS } from '../../data/constants'
 
+const MODE_COLOR = {
+  [MODES.FOCUS]:       'violet',
+  [MODES.SHORT_BREAK]: 'mint',
+  [MODES.LONG_BREAK]:  'pink',
+}
+
 export default function TimerDisplay() {
   const { secondsLeft, totalSeconds, mode, isRunning } = usePomo()
   const progress = totalSeconds > 0 ? 1 - secondsLeft / totalSeconds : 0
   const isUrgent = secondsLeft < 10 && secondsLeft > 0 && isRunning
 
-  const colorByMode = {
-    [MODES.FOCUS]: 'orange',
-    [MODES.SHORT_BREAK]: 'mint',
-    [MODES.LONG_BREAK]: 'pink'
-  }
-
   return (
-    <div className="flex flex-col items-center gap-4 w-full">
-      <div className="flex items-center gap-2 retro-text text-xl text-ink dark:text-cream">
-        <span className="text-2xl">{MODE_EMOJI[mode]}</span>
-        <span>{MODE_LABELS[mode]}</span>
+    <div className="flex flex-col items-center gap-3 w-full">
+      {/* Mode label */}
+      <div className="flex items-center gap-1.5 retro-text text-[13px] text-textMain/80 mb-[-10px] z-10">
+        <span className="text-sm" style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.2))' }}>{MODE_EMOJI[mode]}</span>
+        <span className="tracking-widest uppercase">{MODE_LABELS[mode]} Time</span>
       </div>
+
+      {/* Timer digits */}
       <motion.div
-        animate={isUrgent ? { scale: [1, 1.05, 1] } : { scale: 1 }}
+        animate={isUrgent ? { scale: [1, 1.04, 1] } : { scale: 1 }}
         transition={{ duration: 0.5, repeat: isUrgent ? Infinity : 0 }}
         className={clsx(
-          'pixel-text text-5xl sm:text-7xl md:text-8xl text-ink dark:text-cream timer-glow select-none text-center',
-          isUrgent && 'text-orangeDark dark:text-rose-400'
+          'pixel-text text-[5rem] sm:text-[6rem] md:text-[7rem] leading-none select-none text-center',
+          isUrgent ? 'text-neonPink' : 'text-[#FFE8C2]'
         )}
+        style={{ textShadow: '0 0 40px rgba(139, 92, 246, 0.4)' }}
       >
         {formatTime(secondsLeft)}
       </motion.div>
-      <PixelProgressBar progress={progress} chunks={20} color={colorByMode[mode]} />
+
+      {/* Progress bar */}
+      <PixelProgressBar progress={progress} chunks={19} color={MODE_COLOR[mode]} className="w-full" />
     </div>
   )
 }
