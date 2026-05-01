@@ -219,7 +219,11 @@ function AppShell() {
         initial={characterConfig}
       />
 
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <SettingsModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        onEditAvatar={() => setEditAvatarOpen(true)}
+      />
       <AchievementsModal isOpen={achievementsOpen} onClose={() => setAchievementsOpen(false)} />
       <PixelToastContainer />
     </>

@@ -4,13 +4,13 @@ export default function PixelRoom() {
   return (
     <div className="relative w-full h-full overflow-hidden pointer-events-none">
       <img
-        src="/images/scene/cozy-coder-room.png"
+        src="/images/scene/cozy-girl-coder-room.png"
         alt=""
         aria-hidden="true"
         className="absolute inset-0 w-full h-full object-cover object-center pixelated select-none opacity-20 scale-[1.04] blur-[1.5px]"
       />
       <img
-        src="/images/scene/cozy-coder-room.png"
+        src="/images/scene/cozy-girl-coder-room.png"
         alt="Cozy Room"
         className="absolute inset-0 w-full h-full object-cover object-center pixelated select-none"
       />
