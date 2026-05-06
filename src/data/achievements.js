@@ -3,44 +3,62 @@ export const ACHIEVEMENTS = [
     id: 'first_bloom',
     name: 'First Bloom',
     emoji: '🌸',
+    icon: '🌸',
+    lockedIcon: '🔒',
+    badgeTone: 'pink',
     description: 'Complete your first Pomodoro',
-    check: ({ totalPomos }) => totalPomos >= 1
+    check: ({ totalPomos }) => totalPomos >= 1,
   },
   {
     id: 'night_owl',
     name: 'Night Owl',
     emoji: '🦉',
+    icon: '🦉',
+    lockedIcon: '🌙',
+    badgeTone: 'violet',
     description: 'Study after 10 PM',
-    check: ({ hour }) => hour !== undefined && hour >= 22
+    check: ({ hour }) => hour !== undefined && hour >= 22,
   },
   {
     id: 'early_bird',
     name: 'Early Bird',
     emoji: '🐦',
+    icon: '🐦',
+    lockedIcon: '🌤️',
+    badgeTone: 'sky',
     description: 'Study before 7 AM',
-    check: ({ hour }) => hour !== undefined && hour < 7
+    check: ({ hour }) => hour !== undefined && hour < 7,
   },
   {
     id: 'week_warrior',
     name: 'Week Warrior',
     emoji: '⚔️',
+    icon: '⚔️',
+    lockedIcon: '🛡️',
+    badgeTone: 'amber',
     description: 'Maintain a 7-day streak',
-    check: ({ streak }) => streak >= 7
+    check: ({ streak }) => streak >= 7,
   },
   {
     id: 'study_master',
     name: 'Study Master',
     emoji: '📖',
+    icon: '📖',
+    lockedIcon: '📚',
+    badgeTone: 'blue',
     description: 'Complete 100 Pomodoros total',
-    check: ({ totalPomos }) => totalPomos >= 100
+    check: ({ totalPomos }) => totalPomos >= 100,
   },
   {
     id: 'garden_keeper',
     name: 'Garden Keeper',
     emoji: '🌻',
+    icon: '🌻',
+    lockedIcon: '🌱',
+    badgeTone: 'green',
     description: 'Grow all 19 plants in one day',
-    check: ({ todayPomos }) => todayPomos >= 19
-  }
+    check: ({ todayPomos }) => todayPomos >= 19,
+  },
 ]
 
 export const getAchievementById = (id) => ACHIEVEMENTS.find(a => a.id === id)

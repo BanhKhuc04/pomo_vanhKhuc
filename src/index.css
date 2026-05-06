@@ -1,11 +1,111 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Pixelify+Sans:wght@400;500;600;700&display=swap');
+
+@font-face {
+  font-family: 'Minecraft F2D';
+  src: url('/fonts/minecraft-f2d-v1-42.otf') format('opentype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
+:root,
+html:not(.dark) {
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: grayscale;
   image-rendering: pixelated;
+  --app-bg: #eef2ff;
+  --app-bg-elevated: #f6f8ff;
+  --app-header-bg-1: #fbfcff;
+  --app-header-bg-2: #eef2ff;
+  --app-header-bg-3: #e7ecff;
+  --app-header-border: #cfd7fb;
+  --app-card-border: #cfd8ff;
+  --app-card-border-strong: #b9c4f8;
+  --app-card-bg: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(241,245,255,0.95) 100%);
+  --app-card-shadow: 0 18px 45px rgba(71, 84, 148, 0.12), inset 0 1px 0 rgba(255,255,255,0.7);
+  --app-panel-deep: rgba(232, 237, 255, 0.92);
+  --app-panel-soft: rgba(245, 247, 255, 0.96);
+  --app-footer-bg: rgba(238, 242, 255, 0.96);
+  --app-overlay: rgba(79, 93, 148, 0.24);
+  --app-text-main: #20274a;
+  --app-text-muted: #697399;
+  --app-text-soft: #8790b1;
+  --app-kicker: #5f6fd8;
+  --app-accent: #6a45e6;
+  --app-accent-strong: #4a2baf;
+  --app-accent-soft: rgba(106, 69, 230, 0.12);
+  --app-accent-secondary: #2563eb;
+  --app-warm: #f4b729;
+  --app-success: #22c55e;
+  --app-danger: #ef4444;
+  --app-primary-btn-bg: linear-gradient(180deg, #6A45E6 0%, #4A2BAF 100%);
+  --app-primary-btn-border: #8a6ffc;
+  --app-primary-btn-shadow: 0 10px 24px rgba(76,53,184,0.24);
+  --app-secondary-btn-bg: linear-gradient(180deg, #ffffff 0%, #eef2ff 100%);
+  --app-secondary-btn-hover: #e7ebff;
+  --app-secondary-btn-text: #49527d;
+  --app-glow: rgba(111, 76, 230, 0.18);
+  --profile-bg-main: #eef2ff;
+  --profile-bg-elevated: #f6f8ff;
+  --profile-bg-card: #ffffff;
+  --profile-bg-soft: rgba(245, 247, 255, 0.96);
+  --profile-text-main: #20274a;
+  --profile-text-muted: #697399;
+  --profile-text-soft: #8790b1;
+  --profile-accent-primary: #7C5CFF;
+  --profile-accent-secondary: #38BDF8;
+  --profile-accent-warm: #F59E0B;
+  --profile-accent-pink: #EC4899;
+  --profile-border-soft: rgba(117, 129, 184, 0.18);
+  --profile-border-strong: rgba(98, 109, 166, 0.26);
+}
+
+html.dark {
+  --app-bg: #090b1f;
+  --app-bg-elevated: #0f1126;
+  --app-header-bg-1: #17103a;
+  --app-header-bg-2: #110e34;
+  --app-header-bg-3: #0c0e29;
+  --app-header-border: #43357a;
+  --app-card-border: #51448b;
+  --app-card-border-strong: #5a4d97;
+  --app-card-bg: linear-gradient(180deg, rgba(40,30,90,0.30) 0%, rgba(22,18,47,0.88) 100%);
+  --app-card-shadow: 0 16px 45px rgba(5,8,26,0.55), inset 0 0 0 1px rgba(118,90,215,0.28);
+  --app-panel-deep: rgba(17, 18, 48, 0.96);
+  --app-panel-soft: rgba(23, 20, 59, 0.96);
+  --app-footer-bg: rgba(19, 15, 42, 0.98);
+  --app-overlay: rgba(6, 7, 22, 0.78);
+  --app-text-main: #fff9f0;
+  --app-text-muted: #8b86a5;
+  --app-text-soft: #cbc2ea;
+  --app-kicker: #cfc3f2;
+  --app-accent: #8b5cf6;
+  --app-accent-strong: #4a2baf;
+  --app-accent-soft: rgba(111, 86, 214, 0.18);
+  --app-accent-secondary: #38bdf8;
+  --app-warm: #fbbf24;
+  --app-success: #7ef77b;
+  --app-danger: #f87171;
+  --app-primary-btn-bg: linear-gradient(180deg, #6A45E6 0%, #4A2BAF 100%);
+  --app-primary-btn-border: #8a6ffc;
+  --app-primary-btn-shadow: 0 10px 24px rgba(76,53,184,0.4);
+  --app-secondary-btn-bg: linear-gradient(180deg, #181b3e 0%, #10122d 100%);
+  --app-secondary-btn-hover: #231b48;
+  --app-secondary-btn-text: #d3c8f6;
+  --app-glow: rgba(111, 76, 230, 0.28);
+  --profile-bg-main: #080A17;
+  --profile-bg-elevated: #111427;
+  --profile-bg-card: #171B33;
+  --profile-bg-soft: #202541;
+  --profile-text-main: #F4F6FF;
+  --profile-text-muted: #9EA7C7;
+  --profile-text-soft: #C8CDEE;
+  --profile-border-soft: rgba(255, 255, 255, 0.10);
+  --profile-border-strong: rgba(255, 255, 255, 0.18);
 }
 
 * {
@@ -38,9 +138,9 @@
 html, body {
   margin: 0;
   padding: 0;
-  font-family: 'VT323', monospace;
-  background-color: #0B0914; /* void */
-  color: #FFF9F0;
+  font-family: 'Minecraft F2D', 'Pixelify Sans', 'Be Vietnam Pro', 'Inter', sans-serif;
+  background-color: var(--app-bg);
+  color: var(--app-text-main);
   overflow-x: hidden;
   transition: background-color 0.5s ease, color 0.5s ease;
 }
@@ -51,9 +151,14 @@ html, body {
 }
 
 button {
-  font-family: 'VT323', monospace;
+  font-family: 'Minecraft F2D', 'Pixelify Sans', 'Be Vietnam Pro', 'Inter', sans-serif;
   cursor: pointer;
   user-select: none;
+}
+
+button:focus-visible {
+  outline: 3px solid #38BDF8;
+  outline-offset: 2px;
 }
 
 /* ─── Pixel utility classes ─── */
@@ -72,12 +177,12 @@ button {
     box-shadow: 2px 2px 0 0 #0D0B1A;
   }
   .pixel-text {
-    font-family: 'Press Start 2P', monospace;
-    letter-spacing: 0.05em;
+    font-family: 'Minecraft F2D', 'Pixelify Sans', 'Be Vietnam Pro', 'Inter', sans-serif;
+    letter-spacing: 0.03em;
   }
   .retro-text {
-    font-family: 'VT323', monospace;
-    letter-spacing: 0.02em;
+    font-family: 'Minecraft F2D', 'Pixelify Sans', 'Be Vietnam Pro', 'Inter', sans-serif;
+    letter-spacing: 0;
   }
   .no-rounded {
     border-radius: 0 !important;
@@ -101,14 +206,350 @@ button {
     box-shadow: 0 0 12px #4F46E5, 0 0 24px #4F46E560;
   }
   .dashboard-card {
-    @apply rounded-2xl border border-[#51448B] bg-panel/80 shadow-[0_16px_45px_rgba(5,8,26,0.55),inset_0_0_0_1px_rgba(118,90,215,0.28)] backdrop-blur-sm;
-    background-image: linear-gradient(180deg, rgba(40,30,90,0.30) 0%, rgba(22,18,47,0.88) 100%);
+    border: 1px solid var(--app-card-border);
+    border-radius: 1rem;
+    background: var(--app-card-bg);
+    box-shadow: var(--app-card-shadow);
+    backdrop-filter: blur(10px);
   }
   .dashboard-title {
-    @apply pixel-text text-[11px] text-textMain uppercase tracking-widest;
+    @apply pixel-text text-[11px] uppercase tracking-widest;
+    color: var(--app-text-main);
   }
   .dashboard-value {
-    @apply pixel-text text-[10px] text-[#FFE8C2];
+    @apply pixel-text text-[10px];
+    color: var(--app-warm);
+  }
+  .font-app {
+    font-family: 'Minecraft F2D', 'Pixelify Sans', 'Be Vietnam Pro', 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: normal;
+  }
+  .font-pixel {
+    font-family: 'Minecraft F2D', 'Pixelify Sans', 'Be Vietnam Pro', 'Inter', sans-serif;
+  }
+  .font-ui {
+    font-family: 'Minecraft F2D', 'Pixelify Sans', 'Be Vietnam Pro', 'Inter', sans-serif;
+  }
+  .font-timer {
+    font-family: 'Minecraft F2D', 'Pixelify Sans', 'Be Vietnam Pro', 'Inter', sans-serif;
+    letter-spacing: 0.03em;
+  }
+  .profile-shell {
+    background:
+      radial-gradient(circle at 12% 18%, rgba(124, 92, 255, 0.22), transparent 30%),
+      radial-gradient(circle at 82% 16%, rgba(56, 189, 248, 0.18), transparent 28%),
+      radial-gradient(circle at 72% 74%, rgba(236, 72, 153, 0.14), transparent 28%),
+      linear-gradient(180deg, var(--profile-bg-elevated) 0%, var(--profile-bg-main) 100%);
+  }
+  .profile-surface {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--profile-bg-card) 92%, white 8%) 0%, var(--profile-bg-elevated) 100%);
+    border: 1px solid var(--profile-border-strong);
+    box-shadow: 0 26px 70px rgba(4, 7, 22, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(16px);
+  }
+  .profile-card {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--profile-bg-soft) 90%, white 10%) 0%, var(--profile-bg-card) 100%);
+    border: 1px solid var(--profile-border-soft);
+    box-shadow: 0 18px 40px rgba(4, 7, 22, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  .profile-card-soft {
+    background: var(--profile-bg-soft);
+    border: 1px solid var(--profile-border-soft);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+  .profile-pill {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+  .profile-input {
+    background: var(--profile-bg-soft);
+    border: 1px solid var(--profile-border-soft);
+    color: var(--profile-text-main);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 8px 18px rgba(5, 8, 24, 0.10);
+  }
+  .profile-input::placeholder {
+    color: rgba(200, 205, 238, 0.52);
+  }
+  .profile-button {
+    background: linear-gradient(135deg, rgba(124, 92, 255, 0.96) 0%, rgba(56, 189, 248, 0.88) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 18px 35px rgba(50, 64, 168, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    color: var(--profile-text-main);
+  }
+  .profile-button-secondary {
+    background: var(--app-secondary-btn-bg);
+    border: 1px solid var(--profile-border-soft);
+    box-shadow: 0 12px 24px rgba(4, 7, 22, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    color: var(--profile-text-muted);
+  }
+  .profile-ring {
+    box-shadow:
+      0 0 0 1px var(--profile-border-soft),
+      0 0 0 10px rgba(124, 92, 255, 0.08),
+      0 0 45px rgba(56, 189, 248, 0.12);
+  }
+  .profile-tab-active {
+    background: linear-gradient(135deg, rgba(124, 92, 255, 0.2) 0%, rgba(56, 189, 248, 0.12) 100%);
+    border-color: rgba(124, 92, 255, 0.4);
+    color: var(--profile-text-main);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  .app-shell {
+    background:
+      radial-gradient(circle at 8% 10%, rgba(124, 92, 255, 0.16), transparent 24%),
+      radial-gradient(circle at 88% 14%, rgba(56, 189, 248, 0.12), transparent 22%),
+      linear-gradient(180deg, var(--app-bg-elevated) 0%, var(--app-bg) 100%);
+    color: var(--app-text-main);
+  }
+  .app-header-shell {
+    border-bottom: 1px solid var(--app-header-border);
+    background: linear-gradient(90deg, var(--app-header-bg-1), var(--app-header-bg-2), var(--app-header-bg-3));
+    color: var(--app-text-main);
+    box-shadow: 0 12px 34px rgba(4, 4, 22, 0.14);
+  }
+  .app-icon-btn {
+    background: var(--app-panel-deep);
+    border: 1px solid var(--app-card-border);
+    color: var(--app-text-muted);
+    box-shadow: inset 0 0 0 1px rgba(118, 90, 215, 0.08);
+  }
+  .app-icon-btn:hover {
+    background: var(--app-secondary-btn-hover);
+    color: var(--app-text-main);
+  }
+  .app-modal-shell {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--app-panel-soft) 92%, transparent 8%) 0%, color-mix(in srgb, var(--app-bg-elevated) 94%, transparent 6%) 100%);
+    border: 1px solid var(--app-card-border-strong);
+    box-shadow: 0 38px 120px rgba(3, 6, 20, 0.32), inset 0 0 0 1px rgba(132, 104, 228, 0.16);
+  }
+  .app-modal-header {
+    border-bottom: 1px solid var(--app-card-border);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--app-bg-elevated) 88%, transparent 12%), color-mix(in srgb, var(--app-panel-soft) 82%, transparent 18%));
+  }
+  .app-section-card {
+    border: 1px solid var(--app-card-border);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--app-panel-soft) 96%, transparent 4%) 0%, color-mix(in srgb, var(--app-panel-deep) 92%, transparent 8%) 100%);
+    box-shadow: inset 0 0 0 1px rgba(118, 93, 210, 0.12), 0 14px 36px rgba(3, 6, 20, 0.10);
+  }
+  .app-inline-surface {
+    background: var(--app-panel-deep);
+    border: 1px solid var(--app-card-border);
+  }
+  .app-primary-btn {
+    background: var(--app-primary-btn-bg);
+    border: 1px solid var(--app-primary-btn-border);
+    color: #fff;
+    box-shadow: var(--app-primary-btn-shadow);
+  }
+  .app-primary-btn:hover {
+    filter: brightness(1.08);
+  }
+  .app-secondary-btn {
+    background: var(--app-secondary-btn-bg);
+    border: 1px solid var(--app-card-border);
+    color: var(--app-secondary-btn-text);
+  }
+  .app-secondary-btn:hover {
+    background: var(--app-secondary-btn-hover);
+    color: var(--app-text-main);
+  }
+  .app-footer-bar {
+    border-top: 1px solid var(--app-card-border);
+    background: var(--app-footer-bg);
+  }
+  .app-input {
+    background: var(--app-panel-deep);
+    border: 1px solid var(--app-card-border);
+    color: var(--app-text-main);
+  }
+  .app-input::placeholder {
+    color: var(--app-text-soft);
+  }
+  .app-kicker {
+    color: var(--app-kicker);
+  }
+  .app-muted {
+    color: var(--app-text-muted);
+  }
+  .app-main-text {
+    color: var(--app-text-main);
+  }
+  .app-soft-text {
+    color: var(--app-text-soft);
+  }
+  .app-topbar {
+    min-height: 56px;
+    height: clamp(56px, 7vh, 62px);
+  }
+  .dashboard-shell {
+    min-height: 100dvh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .dashboard-main {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: min(calc(100% - 24px), 1500px);
+    margin-inline: auto;
+    padding-block: clamp(10px, 1.5vh, 18px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(10px, 1vw, 18px);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .dashboard-column {
+    min-height: 0;
+  }
+  .dashboard-scroll,
+  .dashboard-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(10px, 1vw, 18px);
+    min-height: 0;
+    overscroll-behavior-y: contain;
+  }
+  .scene-stage {
+    aspect-ratio: 1846 / 852;
+    min-height: clamp(220px, 33vh, 410px);
+    max-height: min(42vh, 430px);
+  }
+  .timer-card-shell {
+    flex: 0 0 auto;
+  }
+  .timer-panel-shell {
+    min-height: clamp(250px, 34vh, 360px);
+  }
+  .timer-panel-inner {
+    gap: clamp(12px, 1.5vh, 18px);
+  }
+  .shortcut-card {
+    min-height: 78px;
+  }
+  .task-card {
+    max-height: min(45vh, 470px);
+  }
+  .timer-display-value {
+    font-size: clamp(4.2rem, 8.8vh, 6.8rem);
+  }
+  .timer-display-label {
+    font-size: clamp(14px, 2.2vh, 19px);
+  }
+  .session-counter-label {
+    font-size: clamp(16px, 2.4vh, 22px);
+  }
+  .session-counter-chip {
+    width: clamp(1.4rem, 2vh, 1.75rem);
+    height: clamp(1.4rem, 2vh, 1.75rem);
+    font-size: clamp(7px, 0.9vh, 8px);
+  }
+  @media (min-width: 1280px) {
+    .dashboard-main {
+      grid-template-columns: minmax(0, 2.02fr) minmax(320px, 0.92fr);
+      align-items: stretch;
+      overflow: hidden;
+    }
+    .dashboard-column {
+      height: 100%;
+      min-height: 0;
+    }
+    .dashboard-scroll,
+    .dashboard-sidebar {
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: 4px;
+      padding-bottom: 4px;
+      overscroll-behavior-y: contain;
+      scrollbar-gutter: stable;
+    }
+  }
+  @media (max-width: 1024px) {
+    .dashboard-main {
+      width: min(calc(100% - 20px), 1280px);
+      padding-block: 10px;
+    }
+  }
+  @media (max-width: 640px) {
+    .dashboard-main {
+      width: min(calc(100% - 16px), 960px);
+      gap: 10px;
+      padding-block: 8px;
+    }
+    .scene-stage {
+      min-height: 210px;
+      max-height: 300px;
+    }
+    .timer-panel-shell {
+      min-height: 230px;
+    }
+    .task-card {
+      max-height: none;
+    }
+  }
+  @media (min-width: 1280px) and (max-height: 840px) {
+    .dashboard-main {
+      overflow: hidden;
+    }
+    .scene-stage {
+      min-height: clamp(200px, 29vh, 290px);
+      max-height: 32vh;
+    }
+    .timer-panel-shell {
+      min-height: clamp(220px, 30vh, 300px);
+    }
+    .task-card {
+      max-height: none;
+    }
+    .timer-panel-inner {
+      gap: 10px;
+    }
+    .session-tabs-grid {
+      gap: 10px;
+    }
+    .session-tab-btn {
+      padding: 0.7rem 0.8rem;
+      font-size: clamp(8px, 1.25vh, 9px);
+    }
+    .timer-control-btn {
+      padding-top: 0.8rem;
+      padding-bottom: 0.8rem;
+      font-size: clamp(9px, 1.35vh, 10px);
+    }
+    .timer-display-value {
+      font-size: clamp(3.9rem, 7.6vh, 5.5rem);
+    }
+    .timer-display-label {
+      font-size: clamp(13px, 1.9vh, 16px);
+    }
+    .session-counter-label {
+      font-size: clamp(14px, 2vh, 18px);
+    }
+  }
+  @media (min-width: 1280px) and (max-height: 760px) {
+    .dashboard-main {
+      width: min(calc(100% - 18px), 1460px);
+      gap: 10px;
+      padding-block: 8px;
+    }
+    .scene-stage {
+      min-height: 190px;
+      max-height: 29vh;
+    }
+    .timer-panel-shell {
+      min-height: 210px;
+    }
+    .timer-display-value {
+      font-size: clamp(3.5rem, 7vh, 4.8rem);
+    }
+    .shortcut-card {
+      min-height: 70px;
+    }
   }
 }
 

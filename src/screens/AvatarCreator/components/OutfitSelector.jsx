@@ -2,34 +2,36 @@ import React from 'react'
 import clsx from 'clsx'
 import { motion } from 'framer-motion'
 
-export default function OutfitSelector({ value, options, onChange }) {
+export default function OutfitSelector({ value, options, onChange, renderPreview }) {
   if (!options || options.length === 0) return null
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-1">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       {options.map(o => {
         const selected = value === o.id
         return (
           <motion.button
             key={o.id}
+            type="button"
             onClick={() => onChange(o.id)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ y: -1, scale: 1.01 }}
+            whileTap={{ y: 2, scale: 0.98 }}
             className={clsx(
-              'shrink-0 w-[138px] rounded-3xl border p-3 text-left transition-colors',
-              selected ? 'border-white/40 bg-white/15' : 'border-white/10 bg-white/5'
+              'rounded-[22px] border-[3px] p-3 text-left transition-colors shadow-[0_5px_0_#D7B680]',
+              selected
+                ? 'border-[#8B5E34] bg-[#FCE7B2] text-[#4B3425]'
+                : 'border-[#D5B27B] bg-[#FFF7E8] text-[#6B4A2E]'
             )}
-            style={{
-              boxShadow: selected ? '0 18px 45px rgba(124,58,237,0.18)' : '0 16px 40px rgba(0,0,0,0.25)',
-            }}
           >
             <div className="flex items-center justify-between gap-2">
-              <div className="text-[13px] font-extrabold tracking-tight text-white/90">{o.label}</div>
+              <div className="pixel-text text-[8px] uppercase tracking-[0.1em]">{o.label}</div>
               <div className="text-[18px] opacity-80">{o.emoji}</div>
             </div>
-            <div className="mt-2 h-10 rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/0" />
-            <div className={clsx('mt-2 text-[12px] font-semibold', selected ? 'text-white/75' : 'text-white/55')}>
-              {selected ? 'Selected' : 'Tap to try'}
+            <div className="mt-3 flex h-20 items-center justify-center rounded-[18px] border-[3px] border-[#D5B27B] bg-[linear-gradient(180deg,#DFF1FF_0%,#F8F3E7_100%)]">
+              {typeof renderPreview === 'function' ? renderPreview(o) : <div className="h-10 w-10 rounded-xl bg-white/40" />}
+            </div>
+            <div className={clsx('mt-3 text-[13px]', selected ? 'text-[#5B6F42]' : 'text-[#7A6147]')}>
+              {selected ? 'Wearing now' : 'Try this look'}
             </div>
           </motion.button>
         )
@@ -37,4 +39,3 @@ export default function OutfitSelector({ value, options, onChange }) {
     </div>
   )
 }
-

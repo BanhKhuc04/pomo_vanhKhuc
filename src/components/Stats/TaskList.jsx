@@ -5,7 +5,7 @@ import { usePomo } from '../../context/PomoContext'
 import clsx from 'clsx'
 
 export default function TaskList() {
-  const { tasks, addTask, toggleTask, deleteTask, activeTaskId, setActiveTaskId, playSfx } = usePomo()
+  const { tasks, addTask, toggleTask, deleteTask, activeTaskId, setActiveTaskId, playSfx, t } = usePomo()
   const [inputValue, setInputValue] = useState('')
 
   const handleSubmit = (e) => {
@@ -19,37 +19,38 @@ export default function TaskList() {
   const completedCount = tasks.filter(t => t.completed).length
 
   return (
-    <div className="dashboard-card flex flex-col overflow-hidden min-h-[300px] lg:min-h-0 lg:h-full">
+    <div className="dashboard-card task-card flex flex-col overflow-hidden min-h-[280px] sm:min-h-[300px]">
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-panelBorder/35 shrink-0">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b shrink-0" style={{ borderColor: 'var(--app-card-border)' }}>
         <h3 className="dashboard-title flex items-center gap-2">
-          <span className="text-vio">🗒️</span> FOCUS TASKS
+          <span style={{ color: 'var(--app-accent)' }}>🗒️</span> {t('tasks.title')}
         </h3>
         {tasks.length > 0 && (
-          <span className="pixel-text text-[8px] text-textMuted opacity-75 tracking-tight">{completedCount}/{tasks.length}</span>
+          <span className="pixel-text text-[8px] opacity-75 tracking-tight app-muted">{completedCount}/{tasks.length}</span>
         )}
       </div>
 
-      <div className="px-4 py-2 border-b border-panelBorder/35 bg-gradient-to-r from-[#171238] to-[#120F2A] shrink-0">
+      <div className="px-4 py-2 border-b shrink-0" style={{ borderColor: 'var(--app-card-border)', background: 'linear-gradient(90deg, color-mix(in srgb, var(--app-panel-soft) 88%, transparent 12%), var(--app-panel-deep))' }}>
         <div className="flex items-center justify-between gap-3">
-          <span className="pixel-text text-[8px] text-[#7EF77B] uppercase tracking-tight">Active Task</span>
+          <span className="pixel-text text-[8px] uppercase tracking-tight" style={{ color: 'var(--app-success)' }}>{t('tasks.activeTask')}</span>
           {activeTask && !activeTask.completed ? (
             <button
               onClick={() => setActiveTaskId(null)}
-              className="pixel-text text-[8px] text-[#75A5FF] hover:text-[#A5C2FF] uppercase tracking-tight"
+              className="pixel-text text-[8px] uppercase tracking-tight"
+              style={{ color: 'var(--app-accent-secondary)' }}
             >
-              Change
+              {t('tasks.change')}
             </button>
           ) : null}
         </div>
         {activeTask && !activeTask.completed ? (
           <div className="mt-1.5 flex items-center justify-between gap-2">
-            <span className="retro-text text-[21px] leading-none text-textMain truncate">• {activeTask.text}</span>
-            <span className="retro-text text-[18px] leading-none text-amber shrink-0">🍅 {activeTask.pomoCount || 0}</span>
+            <span className="retro-text text-[17px] leading-none truncate app-main-text">• {activeTask.text}</span>
+            <span className="retro-text text-[15px] leading-none shrink-0" style={{ color: 'var(--app-warm)' }}>🍅 {activeTask.pomoCount || 0}</span>
           </div>
         ) : (
-          <div className="mt-1.5 retro-text text-[18px] leading-none text-textMuted">No active task selected</div>
+          <div className="mt-1.5 retro-text text-[15px] leading-none app-muted">{t('tasks.noActiveTask')}</div>
         )}
       </div>
 
@@ -59,13 +60,13 @@ export default function TaskList() {
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          placeholder="What are you working on?"
-          className="flex-1 border border-panelBorder bg-panelDeep/70 text-textMain px-3 py-2 rounded-lg retro-text text-[20px] leading-none focus:outline-none focus:border-vio/60 transition-colors placeholder:text-textMuted/45"
+          placeholder={t('tasks.placeholder')}
+          className="app-input flex-1 px-3 py-2 rounded-lg retro-text text-[17px] leading-none focus:outline-none transition-colors"
           style={{ minWidth: 0 }}
         />
         <button
           type="submit"
-          className="bg-gradient-to-b from-[#6A45E6] to-[#4A2BAF] hover:brightness-110 text-white w-10 rounded-lg flex items-center justify-center transition-all duration-150 active:scale-[0.96] border border-[#8C6CFD] shadow-[0_12px_28px_rgba(76,53,184,0.36)]"
+          className="app-primary-btn w-10 rounded-lg flex items-center justify-center transition-all duration-150 active:scale-[0.96]"
         >
           <Plus size={16} />
         </button>
@@ -76,9 +77,9 @@ export default function TaskList() {
         <AnimatePresence initial={false}>
           {tasks.length === 0 ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="text-center py-5 retro-text text-[18px] leading-none text-textMuted opacity-75">
+              className="text-center py-5 retro-text text-[15px] leading-none app-muted opacity-75">
               <span className="block text-[18px] mb-2">🎯</span>
-              <span className="italic">No tasks yet. Add one to stay focused.</span>
+              <span className="italic">{t('tasks.empty')}</span>
             </motion.div>
           ) : (
             tasks.map((task) => {
@@ -92,15 +93,20 @@ export default function TaskList() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   className={clsx(
                     'flex items-center gap-2.5 px-3 py-2 rounded-lg border transition-all duration-200 group',
-                    isActive ? 'bg-vioDark/15 border-vio/45' : 'bg-panelDeep/45 border-panelBorder/35'
+                    isActive ? 'bg-vioDark/15' : ''
                   )}
+                  style={{
+                    background: isActive ? 'var(--app-accent-soft)' : 'color-mix(in srgb, var(--app-panel-deep) 88%, transparent 12%)',
+                    borderColor: isActive ? 'var(--app-accent)' : 'var(--app-card-border)',
+                  }}
                 >
                   {/* Checkbox */}
                   <button
                     onClick={() => toggleTask(task.id)}
-                    className="text-vio hover:text-amber transition-colors shrink-0"
+                    className="transition-colors shrink-0"
+                    style={{ color: 'var(--app-accent)' }}
                   >
-                    {task.completed ? <CheckCircle2 size={16} className="text-textMuted opacity-55" /> : <Circle size={16} />}
+                    {task.completed ? <CheckCircle2 size={16} className="app-muted opacity-55" /> : <Circle size={16} />}
                   </button>
 
                   {/* Task text + click to set active */}
@@ -114,17 +120,17 @@ export default function TaskList() {
                     }}
                     disabled={task.completed}
                   >
-                    <span className={`retro-text text-[20px] leading-none truncate ${task.completed ? 'line-through text-textMuted opacity-45' : 'text-textMain'}`}>
+                    <span className={`retro-text text-[17px] leading-none truncate ${task.completed ? 'line-through app-muted opacity-45' : 'app-main-text'}`}>
                       {task.text}
                     </span>
                     {task.pomoCount > 0 && (
-                      <span className="retro-text text-[16px] leading-none text-amber/85 shrink-0">🍅 {task.pomoCount}</span>
+                      <span className="retro-text text-[14px] leading-none shrink-0" style={{ color: 'var(--app-warm)' }}>🍅 {task.pomoCount}</span>
                     )}
                   </button>
 
                   {/* Active indicator */}
                   {isActive && !task.completed && (
-                    <Target size={14} className="text-vio shrink-0 animate-pulse" />
+                    <Target size={14} className="shrink-0 animate-pulse" style={{ color: 'var(--app-accent)' }} />
                   )}
 
                   {!isActive && !task.completed && (
@@ -133,17 +139,18 @@ export default function TaskList() {
                         playSfx('CLICK')
                         setActiveTaskId(task.id)
                       }}
-                      className="pixel-text text-[8px] text-textMain border border-panelBorder rounded-md px-2 py-1 hover:border-vio shrink-0"
+                      className="pixel-text text-[8px] border rounded-md px-2 py-1 shrink-0 app-main-text"
+                      style={{ borderColor: 'var(--app-card-border)', background: 'var(--app-panel-soft)' }}
                     >
-                      Set
+                      {t('tasks.set')}
                     </button>
                   )}
 
                   {/* Delete */}
                   <button
                     onClick={() => deleteTask(task.id)}
-                    className="opacity-0 group-hover:opacity-100 text-textMuted hover:text-neonPink transition-all shrink-0"
-                    aria-label="Delete task"
+                    className="opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-all shrink-0 app-muted"
+                    aria-label={t('tasks.deleteTask')}
                   >
                     <Trash2 size={14} />
                   </button>
@@ -155,13 +162,13 @@ export default function TaskList() {
       </div>
 
       {/* Footer / Active Task Summary */}
-      <div className="px-4 py-2 shrink-0 flex items-center justify-end border-t border-panelBorder/30 bg-panelDeep/25">
+      <div className="px-4 py-2 shrink-0 flex items-center justify-end border-t min-h-[38px]" style={{ borderColor: 'var(--app-card-border)', background: 'color-mix(in srgb, var(--app-panel-deep) 60%, transparent 40%)' }}>
         {tasks.filter(t => t.completed).length > 0 && (
           <button
             onClick={() => tasks.filter(t => t.completed).forEach(t => deleteTask(t.id))}
-            className="pixel-text text-[8px] text-textMuted hover:text-neonPink uppercase transition-colors tracking-tight"
+            className="pixel-text text-[8px] uppercase transition-colors tracking-tight app-muted"
           >
-            Clear Done
+            {t('tasks.clearDone')}
           </button>
         )}
       </div>

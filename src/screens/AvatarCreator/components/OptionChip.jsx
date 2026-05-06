@@ -2,21 +2,22 @@ import React from 'react'
 import clsx from 'clsx'
 import { motion } from 'framer-motion'
 
-export default function OptionChip({ selected, onClick, children }) {
+export default function OptionChip({ selected, onClick, children, className }) {
   return (
     <motion.button
+      type="button"
       onClick={onClick}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={{ y: -1, scale: 1.01 }}
+      whileTap={{ y: 2, scale: 0.98 }}
       className={clsx(
-        'shrink-0 rounded-full px-4 py-2 border text-[13px] font-semibold transition-colors whitespace-nowrap',
+        'shrink-0 rounded-[22px] border-[3px] text-[13px] transition-colors shadow-[0_5px_0_#D7B680]',
         selected
-          ? 'border-white/45 bg-white/15 text-white shadow-[0_14px_45px_rgba(124,58,237,0.20)]'
-          : 'border-white/10 bg-white/5 text-white/70'
+          ? 'border-[#8B5E34] bg-[#FCE7B2] text-[#4B3425]'
+          : 'border-[#D5B27B] bg-[#FFF7E8] text-[#6B4A2E]',
+        className
       )}
     >
       {children}
     </motion.button>
   )
 }
-

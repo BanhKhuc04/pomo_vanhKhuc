@@ -4,7 +4,8 @@ import { motion } from 'framer-motion'
 import { usePomo } from '../../context/PomoContext'
 import { formatTime } from '../../utils/helpers'
 import PixelProgressBar from '../UI/PixelProgressBar'
-import { MODES, MODE_EMOJI, MODE_LABELS } from '../../data/constants'
+import { MODES, MODE_EMOJI } from '../../data/constants'
+import { getModeLabel } from '../../data/translations'
 
 const MODE_COLOR = {
   [MODES.FOCUS]:       'violet',
@@ -13,16 +14,16 @@ const MODE_COLOR = {
 }
 
 export default function TimerDisplay() {
-  const { secondsLeft, totalSeconds, mode, isRunning } = usePomo()
+  const { secondsLeft, totalSeconds, mode, isRunning, locale, t } = usePomo()
   const progress = totalSeconds > 0 ? 1 - secondsLeft / totalSeconds : 0
   const isUrgent = secondsLeft < 10 && secondsLeft > 0 && isRunning
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full">
+    <div className="timer-display-shell flex flex-col items-center gap-3 w-full">
       {/* Mode label */}
-      <div className="flex items-center gap-2 retro-text text-[23px] leading-none text-[#E8E1FF] z-10">
+      <div className="timer-display-label flex items-center gap-2 font-timer text-[16px] sm:text-[19px] leading-none z-10 app-main-text">
         <span className="text-[18px]" style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.2))' }}>{MODE_EMOJI[mode]}</span>
-        <span className="tracking-wide">{MODE_LABELS[mode]} Time</span>
+        <span className="tracking-wide">{t('timer.modeTime', { mode: getModeLabel(locale, mode) })}</span>
       </div>
 
       {/* Timer digits */}
@@ -30,10 +31,13 @@ export default function TimerDisplay() {
         animate={isUrgent ? { scale: [1, 1.04, 1] } : { scale: 1 }}
         transition={{ duration: 0.5, repeat: isUrgent ? Infinity : 0 }}
         className={clsx(
-          'pixel-text text-[5.7rem] sm:text-[7.2rem] md:text-[7.8rem] leading-none select-none text-center tracking-[0.08em]',
-          isUrgent ? 'text-neonPink' : 'text-[#FFE8C2]'
+          'timer-display-value font-timer text-[4.7rem] sm:text-[6rem] md:text-[6.8rem] leading-none select-none text-center tracking-[0.02em]',
+          isUrgent ? 'text-neonPink' : ''
         )}
-        style={{ textShadow: '0 0 42px rgba(128,96,246,0.45), 0 0 14px rgba(255,232,194,0.2)' }}
+        style={{
+          color: isUrgent ? '#EC4899' : 'var(--app-text-main)',
+          textShadow: '0 0 36px rgba(128,96,246,0.26), 0 0 12px rgba(255,232,194,0.12)',
+        }}
       >
         {formatTime(secondsLeft)}
       </motion.div>

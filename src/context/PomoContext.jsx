@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import useLocalStorage from '../hooks/useLocalStorage'
 import useTimer from '../hooks/useTimer'
 import useTheme from '../hooks/useTheme'
@@ -6,11 +6,12 @@ import useSound from '../hooks/useSound'
 import useStreak from '../hooks/useStreak'
 import useAchievements from '../hooks/useAchievements'
 import {
-  MODES, DEFAULT_SETTINGS, DEFAULT_STATS, STORAGE_KEYS,
+  DEFAULT_APP_NAME, MODES, DEFAULT_SETTINGS, DEFAULT_STATS, STORAGE_KEYS, THEME_MODES, normalizeSettings,
   SESSIONS_BEFORE_LONG, GARDEN_SIZE, PLANT_STAGES
 } from '../data/constants'
 import { todayKey, notify, requestNotificationPermission, formatTime } from '../utils/helpers'
-import { normalizeCharacterConfig } from '../data/characterOptions'
+import { normalizeProfile } from '../data/profileDefaults'
+import { createTranslator, getAchievementCopy, getModeLabel } from '../data/translations'
 
 const PomoContext = createContext(null)
 
@@ -26,7 +27,7 @@ const initialGarden = () => ({
 })
 
 export function PomoProvider({ children }) {
-  const [settings, setSettings] = useLocalStorage(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS)
+  const [settingsRaw, setSettingsRaw] = useLocalStorage(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS)
   const [stats, setStats] = useLocalStorage(STORAGE_KEYS.STATS, DEFAULT_STATS)
   const [garden, setGarden] = useLocalStorage(STORAGE_KEYS.GARDEN, initialGarden())
   const [mode, setMode] = useState(MODES.FOCUS)
@@ -34,7 +35,19 @@ export function PomoProvider({ children }) {
   const [muted, setMuted] = useState(false)
   const [toasts, setToasts] = useState([])
 
-  const theme = useTheme(settings.autoDarkMode)
+  const settings = normalizeSettings(settingsRaw)
+  const t = useMemo(() => createTranslator(settings.locale), [settings.locale])
+  const updateSettings = useCallback((nextSettings) => {
+    setSettingsRaw(prevRaw => {
+      const prev = normalizeSettings(prevRaw)
+      const resolved = typeof nextSettings === 'function'
+        ? nextSettings(prev)
+        : nextSettings
+      return normalizeSettings(resolved)
+    })
+  }, [setSettingsRaw])
+
+  const theme = useTheme(settings.themeMode)
   const sound = useSound({
     musicVolume: settings.musicVolume,
     sfxVolume: settings.sfxVolume,
@@ -74,7 +87,7 @@ export function PomoProvider({ children }) {
   const [tasks, setTasks] = useLocalStorage(STORAGE_KEYS.TASKS || 'pomo_tasks', [])
   const [activeTaskId, setActiveTaskId] = useState(null)
   const [dailyStats, setDailyStats] = useLocalStorage('pomo_daily_stats', {})
-  const [characterConfigRaw, setCharacterConfigRaw] = useLocalStorage('pomo_character', null)
+  const [profileRaw, setProfileRaw] = useLocalStorage('pomo_profile', null)
   const [sessionJustCompleted, setSessionJustCompleted] = useState(false)
 
   // Normalize tasks on load
@@ -188,11 +201,12 @@ export function PomoProvider({ children }) {
         hour
       })
       newlyUnlocked.forEach(a => {
+        const achievementCopy = getAchievementCopy(settings.locale, a.id)
         sound.play('ACHIEVEMENT')
         pushToast({
           type: 'achievement',
-          title: 'Achievement Unlocked!',
-          message: `${a.emoji} ${a.name}`,
+          title: t('toasts.achievementUnlocked'),
+          message: `${a.emoji} ${achievementCopy.name}`,
           duration: 4500
         })
       })
@@ -205,12 +219,19 @@ export function PomoProvider({ children }) {
 
       pushToast({
         type: 'success',
-        title: 'Focus Complete!',
-        message: `Time for a ${next === MODES.LONG_BREAK ? 'long' : 'short'} break 🌿`
+        title: t('toasts.focusCompleteTitle'),
+        message: t('toasts.focusCompleteMessage', {
+          breakType: next === MODES.LONG_BREAK ? t('toasts.breakTypeLong') : t('toasts.breakTypeShort')
+        })
       })
 
       if (settings.notificationsEnabled) {
-        notify('🍅 Focus session complete!', `Take a ${next === MODES.LONG_BREAK ? 'long' : 'short'} break.`)
+        notify(
+          t('notifications.focusCompleteTitle'),
+          t('notifications.focusCompleteMessage', {
+            breakType: next === MODES.LONG_BREAK ? t('toasts.breakTypeLong') : t('toasts.breakTypeShort')
+          })
+        )
       }
 
       setMode(next)
@@ -218,15 +239,15 @@ export function PomoProvider({ children }) {
       // Break finished
       pushToast({
         type: 'info',
-        title: 'Break Over!',
-        message: 'Ready to focus again? 💪'
+        title: t('toasts.breakOverTitle'),
+        message: t('toasts.breakOverMessage')
       })
       if (settings.notificationsEnabled) {
-        notify('☕ Break over!', 'Time to focus again.')
+        notify(t('notifications.breakOverTitle'), t('notifications.breakOverMessage'))
       }
       setMode(MODES.FOCUS)
     }
-  }, [mode, settings, stats, sound, completedFocusInCycle, getNextMode, setStats, setGarden, streakHook, achievementsHook, pushToast, activeTaskId, setTasks, setDailyStats])
+  }, [mode, settings, stats, sound, completedFocusInCycle, getNextMode, setStats, setGarden, streakHook, achievementsHook, pushToast, activeTaskId, setTasks, setDailyStats, t])
 
   // Tick handler (optional tick sound)
   const handleTick = useCallback((secondsLeft) => {
@@ -234,17 +255,17 @@ export function PomoProvider({ children }) {
       sound.play('TICK')
     }
     // Update tab title
-    document.title = `${formatTime(secondsLeft)} • ${mode === MODES.FOCUS ? '🍅' : mode === MODES.SHORT_BREAK ? '☕' : '😴'} POMO TIME`
-  }, [settings.tickEnabled, mode, sound])
+    document.title = `${formatTime(secondsLeft)} • ${getModeLabel(settings.locale, mode)} • ${settings.appName || DEFAULT_APP_NAME}`
+  }, [settings.tickEnabled, mode, sound, settings.appName, settings.locale])
 
   const timer = useTimer(currentDurationSec, handleComplete, handleTick)
 
   // Reset title on stop
   useEffect(() => {
     if (!timer.isRunning) {
-      document.title = '🍅 POMO TIME'
+      document.title = `🍅 ${settings.appName || DEFAULT_APP_NAME}`
     }
-  }, [timer.isRunning])
+  }, [timer.isRunning, settings.appName])
 
   // Handle music start/stop based on mode + running state
   useEffect(() => {
@@ -286,15 +307,24 @@ export function PomoProvider({ children }) {
 
   // Reset all data
   const resetAllData = useCallback(() => {
-    setSettings(DEFAULT_SETTINGS)
+    sound.stop('LOFI_BG')
+    sound.stop('TICK')
+    updateSettings(DEFAULT_SETTINGS)
     setStats(DEFAULT_STATS)
     setGarden(initialGarden())
+    setTasks([])
+    setDailyStats({})
+    setActiveTaskId(null)
+    setProfileRaw(null)
+    setMuted(false)
+    setSessionJustCompleted(false)
     streakHook.resetStreak()
     achievementsHook.resetAchievements()
     setCompletedFocusInCycle(0)
     setMode(MODES.FOCUS)
-    pushToast({ type: 'info', title: 'Reset Complete', message: 'All data cleared 🧹' })
-  }, [setSettings, setStats, setGarden, streakHook, achievementsHook, pushToast])
+    timer.reset()
+    pushToast({ type: 'info', title: t('toasts.resetCompleteTitle'), message: t('toasts.resetCompleteMessage') })
+  }, [updateSettings, setStats, setGarden, setTasks, setDailyStats, streakHook, achievementsHook, pushToast, t, sound, timer, setProfileRaw])
 
   const addTask = useCallback((text) => {
     if (!text.trim()) return
@@ -350,7 +380,9 @@ export function PomoProvider({ children }) {
     tasks, addTask, toggleTask, deleteTask,
     activeTaskId, setActiveTaskId,
     // settings
-    settings, setSettings,
+    settings, setSettings: updateSettings,
+    locale: settings.locale,
+    t,
     // stats
     stats, dailyStats,
     // garden
@@ -372,16 +404,20 @@ export function PomoProvider({ children }) {
     muted, setMuted, playSfx: sound.play,
     // theme
     theme: theme.theme,
+    resolvedTheme: theme.resolvedTheme,
     isDark: theme.isDark,
-    toggleTheme: theme.toggleTheme,
-    setTheme: theme.setTheme,
+    toggleTheme: () => updateSettings(prev => ({
+      ...prev,
+      themeMode: prev.themeMode === THEME_MODES.DARK ? THEME_MODES.LIGHT : THEME_MODES.DARK,
+    })),
+    setTheme: (nextTheme) => updateSettings(prev => ({ ...prev, themeMode: nextTheme })),
     // toasts
     toasts, pushToast, removeToast,
     // utility
     resetAllData,
-    // character
-    characterConfig: characterConfigRaw ? normalizeCharacterConfig(characterConfigRaw) : null,
-    saveCharacterConfig: (cfg) => setCharacterConfigRaw(cfg),
+    // profile
+    profile: profileRaw ? normalizeProfile(profileRaw) : null,
+    saveProfile: (cfg) => setProfileRaw(normalizeProfile(cfg)),
     sessionJustCompleted,
   }
 

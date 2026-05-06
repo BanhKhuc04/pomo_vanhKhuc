@@ -7,6 +7,8 @@ export default function AvatarCreatorModal({ isOpen, initial, onClose, onSave })
     if (!isOpen) return
     const prev = document.documentElement.dataset.modal
     document.documentElement.dataset.modal = 'avatar'
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
 
     const onKeyDown = (e) => {
       if (e.key === 'Escape') onClose?.()
@@ -15,6 +17,7 @@ export default function AvatarCreatorModal({ isOpen, initial, onClose, onSave })
 
     return () => {
       document.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = prevOverflow
       if (prev === undefined) delete document.documentElement.dataset.modal
       else document.documentElement.dataset.modal = prev
     }
@@ -29,8 +32,8 @@ export default function AvatarCreatorModal({ isOpen, initial, onClose, onSave })
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.18 }}
-          className="fixed inset-0 z-[220] flex items-center justify-center p-4"
-          style={{ background: 'rgba(6,7,22,0.72)', backdropFilter: 'blur(10px)' }}
+          className="fixed inset-0 z-[220] flex items-center justify-center p-3 sm:p-5"
+          style={{ background: 'rgba(95, 70, 45, 0.22)', backdropFilter: 'blur(8px)' }}
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) onClose?.()
           }}
@@ -41,22 +44,18 @@ export default function AvatarCreatorModal({ isOpen, initial, onClose, onSave })
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.98, y: 10, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 340, damping: 28 }}
-            className="w-full max-w-[460px]"
-            style={{ maxHeight: '92vh' }}
+            className="w-full max-w-6xl"
+            style={{ maxHeight: '94vh' }}
           >
-            <div className="max-h-[92vh] overflow-hidden rounded-[36px]">
-              <div className="max-h-[92vh] overflow-y-auto custom-scrollbar">
-                <AvatarCreatorScreen
-                  mode="modal"
-                  initial={initial}
-                  onSave={(cfg) => {
-                    onSave?.(cfg)
-                    onClose?.()
-                  }}
-                  onClose={onClose}
-                />
-              </div>
-            </div>
+            <AvatarCreatorScreen
+              mode="modal"
+              initial={initial}
+              onSave={(cfg) => {
+                onSave?.(cfg)
+                onClose?.()
+              }}
+              onClose={onClose}
+            />
           </motion.div>
         </motion.div>
       )}

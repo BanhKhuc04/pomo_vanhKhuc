@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { Settings, Trophy, Volume2, VolumeX, User } from 'lucide-react'
+import { Settings, Trophy, Volume2, VolumeX } from 'lucide-react'
 import { PomoProvider, usePomo } from './context/PomoContext'
-import AvatarCreatorScreen from './screens/AvatarCreator/AvatarCreatorScreen'
-import AvatarCreatorModal from './screens/AvatarCreator/AvatarCreatorModal'
+import ProfileSetupScreen from './screens/Profile/ProfileSetupScreen'
+import ProfileModal from './screens/Profile/ProfileModal'
+import UserAvatar from './components/Profile/UserAvatar'
 
 // Scene
 import PixelRoom from './components/Scene/PixelRoom'
@@ -23,6 +24,7 @@ import AchievementsModal from './components/Stats/AchievementsModal'
 
 // Settings modal
 import SettingsModal from './components/Settings/SettingsModal'
+import SupportModal, { SupportFloatingButton } from './components/Support/SupportModal'
 
 // UI
 import PixelToastContainer from './components/UI/PixelToast'
@@ -34,7 +36,7 @@ function IconBtn({ onClick, label, children }) {
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center border border-[#43357A] rounded-lg bg-[#111230] hover:bg-[#17173B] transition-colors text-textMuted hover:text-textMain shadow-[inset_0_0_10px_rgba(109,87,212,0.15)]"
+      className="app-icon-btn h-9 w-9 rounded-lg transition-colors flex items-center justify-center sm:h-10 sm:w-10"
     >
       {children}
     </button>
@@ -42,55 +44,42 @@ function IconBtn({ onClick, label, children }) {
 }
 
 // ─── Header ─────────────────────────────────────────────────────────────────
-function Header({ onOpenSettings, onOpenAchievements, onEditCharacter }) {
-  const { muted, setMuted, playSfx } = usePomo()
-  const [avatarImgFailed, setAvatarImgFailed] = useState(false)
-
+function Header({ onOpenSettings, onOpenAchievements, onOpenProfile, profile, appName }) {
+  const { muted, setMuted, playSfx, t } = usePomo()
   return (
     <header
-      className="shrink-0 w-full flex items-center justify-between px-4 sm:px-6 border-b border-[#43357A] bg-gradient-to-r from-[#17103A] via-[#110E34] to-[#0C0E29] shadow-[0_12px_34px_rgba(4,4,22,0.55)]"
-      style={{ height: 62 }}
+      className="app-header-shell app-topbar shrink-0 w-full flex items-center justify-between px-3 sm:px-4 lg:px-6"
     >
       {/* Logo */}
       <div className="flex items-center gap-3 min-w-0">
         <span className="text-[20px] inline-block" style={{ filter: 'drop-shadow(0 0 8px rgba(248,94,168,0.42))' }}>🍅</span>
-        <span className="pixel-text text-[13px] sm:text-[14px] text-textMain tracking-[0.12em] whitespace-nowrap">POMO TIME</span>
+        <span className="pixel-text text-[10px] sm:text-[11px] lg:text-[12px] tracking-[0.08em] truncate max-w-[120px] sm:max-w-[180px] lg:max-w-[320px] app-main-text">{appName}</span>
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-2 sm:gap-2.5">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         <StreakBadge compact />
 
-        <IconBtn onClick={() => { playSfx('CLICK'); setMuted(m => !m) }} label={muted ? 'Unmute' : 'Mute'}>
+        <IconBtn onClick={() => { playSfx('CLICK'); setMuted(m => !m) }} label={muted ? t('header.unmute') : t('header.mute')}>
           {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
         </IconBtn>
 
-        <IconBtn onClick={() => { playSfx('CLICK'); onOpenAchievements() }} label="Achievements">
+        <IconBtn onClick={() => { playSfx('CLICK'); onOpenAchievements() }} label={t('header.achievements')}>
           <Trophy size={16} />
         </IconBtn>
 
-        <IconBtn onClick={() => { playSfx('CLICK'); onOpenSettings() }} label="Settings">
+        <IconBtn onClick={() => { playSfx('CLICK'); onOpenSettings() }} label={t('header.settings')}>
           <Settings size={16} />
         </IconBtn>
 
-        {/* Edit Character Avatar Icon */}
+        {/* Profile */}
         <button
-          onClick={() => { playSfx('CLICK'); onEditCharacter() }}
-          title="Edit Character"
-          className="ml-0.5 w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#111230] border border-[#43357A] flex items-center justify-center overflow-hidden hover:bg-[#17173B] transition-colors shadow-[inset_0_0_10px_rgba(109,87,212,0.16)]"
-          aria-label="Edit avatar"
+          onClick={() => { playSfx('CLICK'); onOpenProfile() }}
+          title={t('header.openProfile')}
+          className="app-icon-btn ml-0.5 w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center overflow-hidden transition-colors"
+          aria-label={t('header.openProfile')}
         >
-          {!avatarImgFailed ? (
-            <img
-              src="/images/avatar/base/idle.png"
-              alt="Avatar"
-              className="w-8 h-8 object-contain pixelated"
-              style={{ transform: 'translateY(4px) scale(0.98)' }}
-              onError={() => setAvatarImgFailed(true)}
-            />
-          ) : (
-            <User size={18} className="text-textMuted" />
-          )}
+          <UserAvatar profile={profile} size="sm" className="h-8 w-8 sm:h-9 sm:w-9" />
         </button>
       </div>
     </header>
@@ -101,9 +90,9 @@ function Header({ onOpenSettings, onOpenAchievements, onEditCharacter }) {
 function TimerPanel() {
   return (
     <div
-      className="w-full min-h-[340px] lg:min-h-[370px] flex flex-col items-center justify-center gap-5 px-6 py-6 sm:px-8 sm:py-7 relative overflow-hidden"
+      className="timer-panel-shell w-full flex flex-col items-center justify-center gap-4 px-4 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6 relative overflow-hidden"
       style={{
-        background: 'radial-gradient(circle at 30% 14%, rgba(85,53,192,0.34) 0%, rgba(24,22,63,0.95) 52%, rgba(12,14,34,0.98) 100%)'
+        background: 'radial-gradient(circle at 30% 14%, rgba(85,53,192,0.28) 0%, color-mix(in srgb, var(--app-panel-soft) 88%, rgba(24,22,63,0.12) 12%) 52%, var(--app-bg-elevated) 100%)'
       }}
     >
       {/* Background ambient glow */}
@@ -111,7 +100,7 @@ function TimerPanel() {
       <div className="absolute bottom-0 right-10 w-64 h-36 bg-[#2563EB]/20 blur-[78px] pointer-events-none rounded-full" />
       <div className="absolute inset-[10px] rounded-[16px] border border-[#594A96]/60 shadow-[inset_0_0_30px_rgba(98,74,191,0.2)] pointer-events-none" />
       
-      <div className="relative z-10 flex flex-col items-center w-full gap-5">
+      <div className="timer-panel-inner relative z-10 flex flex-col items-center w-full gap-4">
         <SessionTabs />
         <TimerDisplay />
         <SessionCounter />
@@ -123,52 +112,55 @@ function TimerPanel() {
 
 // ─── Keyboard Shortcuts strip ─────────────────────────────────────────────────
 function ShortcutsBar() {
+  const { t } = usePomo()
   return (
-    <div className="dashboard-card shrink-0 px-4 py-3.5 min-h-[92px]">
+    <div className="dashboard-card shortcut-card shrink-0 px-4 py-3">
       <div className="dashboard-title mb-2 flex items-center gap-2">
         <span>⌨️</span>
-        <span>Shortcuts</span>
+        <span>{t('header.shortcuts')}</span>
       </div>
-      <span className="retro-text text-[20px] leading-none text-textMuted flex items-center justify-start gap-2 flex-wrap">
-        <span className="bg-panelDeep border border-panelBorder rounded px-1.5 py-0.5 text-[10px] pixel-text text-textMain">Space</span>
-        = Start/Pause
+      <span className="retro-text text-[15px] sm:text-[16px] leading-none app-muted flex items-center justify-start gap-2 flex-wrap">
+        <span className="app-inline-surface rounded px-1.5 py-0.5 text-[9px] pixel-text app-main-text">Space</span>
+        = {t('header.startPause')}
         <span className="opacity-30">•</span>
-        <span className="bg-panelDeep border border-panelBorder rounded px-1.5 py-0.5 text-[10px] pixel-text text-textMain">R</span>
-        = Reset
+        <span className="app-inline-surface rounded px-1.5 py-0.5 text-[9px] pixel-text app-main-text">R</span>
+        = {t('header.reset')}
         <span className="opacity-30">•</span>
-        <span className="bg-panelDeep border border-panelBorder rounded px-1.5 py-0.5 text-[10px] pixel-text text-textMain">M</span>
-        = Mute
+        <span className="app-inline-surface rounded px-1.5 py-0.5 text-[9px] pixel-text app-main-text">M</span>
+        = {t('header.muteShortcut')}
       </span>
     </div>
   )
 }
 
 // ─── Main Layout ──────────────────────────────────────────────────────────────
-function MainLayout({ onOpenSettings, onOpenAchievements, onEditCharacter }) {
+function MainLayout({ onOpenSettings, onOpenAchievements, onOpenProfile, profile, appName }) {
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-[#090B1F] text-textMain">
+    <div className="app-shell dashboard-shell">
       <Header
         onOpenSettings={onOpenSettings}
         onOpenAchievements={onOpenAchievements}
-        onEditCharacter={onEditCharacter}
+        onOpenProfile={onOpenProfile}
+        profile={profile}
+        appName={appName}
       />
 
-      <main className="flex-1 min-h-0 w-[96vw] max-w-[1560px] mx-auto py-4 lg:py-5
-                       grid grid-cols-1 lg:grid-cols-[minmax(0,2.2fr)_minmax(420px,1fr)]
-                       gap-4 lg:gap-[18px] overflow-y-auto lg:overflow-hidden">
+      <main className="dashboard-main">
 
         {/* LEFT: Room + Timer */}
-        <section className="flex flex-col gap-4 lg:gap-[18px] min-h-0 order-2 lg:order-1 lg:h-full">
-          <div className="dashboard-card relative overflow-hidden aspect-[16/9] min-h-[290px] lg:min-h-[450px] border-[#55479A] shadow-[0_20px_52px_rgba(4,7,28,0.62),inset_0_0_0_1px_rgba(132,106,228,0.28)]">
+        <section className="dashboard-column dashboard-primary order-2 xl:order-1">
+          <div className="dashboard-scroll custom-scrollbar">
+          <div className="dashboard-card scene-stage relative overflow-hidden">
             <PixelRoom />
           </div>
-          <div className="dashboard-card shrink-0 overflow-hidden border-[#55479A] shadow-[0_20px_52px_rgba(4,7,28,0.62),inset_0_0_0_1px_rgba(132,106,228,0.25)]">
+          <div className="dashboard-card timer-card-shell shrink-0 overflow-hidden">
             <TimerPanel />
+          </div>
           </div>
         </section>
 
         {/* RIGHT sidebar */}
-        <aside className="min-h-0 order-1 lg:order-2 lg:h-full lg:overflow-hidden pb-2 pr-1 flex flex-col gap-3 lg:gap-2.5 lg:grid lg:grid-rows-[auto_auto_minmax(0,1fr)_auto_auto]">
+        <aside className="dashboard-column dashboard-sidebar order-1 xl:order-2 custom-scrollbar">
           <StatsPanel />
           <WeeklyStats />
           <TaskList />
@@ -184,22 +176,22 @@ function MainLayout({ onOpenSettings, onOpenAchievements, onEditCharacter }) {
 function AppShell() {
   const [settingsOpen, setSettingsOpen]       = useState(false)
   const [achievementsOpen, setAchievementsOpen] = useState(false)
-  const [editAvatarOpen, setEditAvatarOpen]   = useState(false)
+  const [profileOpen, setProfileOpen]         = useState(false)
+  const [supportOpen, setSupportOpen]         = useState(false)
 
-  const { characterConfig, saveCharacterConfig } = usePomo()
+  const { profile, saveProfile, settings } = usePomo()
 
-  // First-time setup: characterConfig is null → show onboarding screen
-  const showSetup = !characterConfig
+  const showSetup = !profile
 
   useEffect(() => {
-    document.documentElement.classList.add('dark')
+    document.documentElement.classList.add('theme-ready')
   }, [])
 
   if (showSetup) {
     return (
-      <AvatarCreatorScreen
+      <ProfileSetupScreen
         initial={null}
-        onSave={saveCharacterConfig}
+        onSave={saveProfile}
       />
     )
   }
@@ -209,22 +201,22 @@ function AppShell() {
       <MainLayout
         onOpenSettings={() => setSettingsOpen(true)}
         onOpenAchievements={() => setAchievementsOpen(true)}
-        onEditCharacter={() => setEditAvatarOpen(true)}
+        onOpenProfile={() => setProfileOpen(true)}
+        profile={profile}
+        appName={settings.appName}
       />
 
-      <AvatarCreatorModal
-        isOpen={editAvatarOpen}
-        onClose={() => setEditAvatarOpen(false)}
-        onSave={saveCharacterConfig}
-        initial={characterConfig}
-      />
+      <SupportFloatingButton onClick={() => setSupportOpen(true)} />
+
+      <ProfileModal isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
 
       <SettingsModal
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        onEditAvatar={() => setEditAvatarOpen(true)}
+        onOpenProfile={() => setProfileOpen(true)}
       />
       <AchievementsModal isOpen={achievementsOpen} onClose={() => setAchievementsOpen(false)} />
+      <SupportModal isOpen={supportOpen} onClose={() => setSupportOpen(false)} />
       <PixelToastContainer />
     </>
   )
