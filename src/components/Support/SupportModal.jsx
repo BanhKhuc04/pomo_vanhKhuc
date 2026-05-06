@@ -1,10 +1,11 @@
 import React from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Heart, Sparkles, X } from 'lucide-react'
+import { Heart, MessageCircleMore, Sparkles, X } from 'lucide-react'
 import { usePomo } from '../../context/PomoContext'
 
 const SUPPORT_QR_SRC = '/images/support/vietcombank-qr.jpg'
 const SUPPORT_BANNER_SRC = '/images/support/thankyou.png'
+const SUPPORT_FEEDBACK_URL = 'https://forms.gle/25Qn8ho3WeK41k1d6'
 
 export function SupportFloatingButton({ onClick }) {
   const { t, playSfx } = usePomo()
@@ -29,7 +30,7 @@ export function SupportFloatingButton({ onClick }) {
 }
 
 export default function SupportModal({ isOpen, onClose }) {
-  const { t } = usePomo()
+  const { t, playSfx } = usePomo()
 
   return (
     <AnimatePresence>
@@ -180,6 +181,61 @@ export default function SupportModal({ isOpen, onClose }) {
                           {t('support.qrNote')}
                         </p>
                         </div>
+                      </div>
+
+                      <div
+                        className="rounded-2xl border px-4 py-4 sm:px-4.5 sm:py-4.5"
+                        style={{
+                          borderColor: 'rgba(138,111,252,0.26)',
+                          background: 'linear-gradient(180deg, rgba(38,28,92,0.94) 0%, rgba(23,18,56,0.96) 100%)',
+                          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 16px 30px rgba(10,8,28,0.24), 0 0 24px rgba(111,76,230,0.12)',
+                        }}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span
+                            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border"
+                            style={{
+                              borderColor: 'rgba(138,111,252,0.32)',
+                              background: 'linear-gradient(180deg, rgba(123,92,255,0.2) 0%, rgba(56,189,248,0.08) 100%)',
+                              boxShadow: '0 8px 20px rgba(76,53,184,0.18)',
+                            }}
+                          >
+                            <MessageCircleMore size={18} className="text-[#E7D7FF]" />
+                          </span>
+                          <div className="min-w-0">
+                            <div className="pixel-text text-[8px] uppercase tracking-[0.11em] text-[#F3EEFF]">
+                              {t('support.feedbackTitle')}
+                            </div>
+                            <p className="retro-text mt-2 text-[13px] lg:text-[14px] leading-[1.26] text-[#D8D0F8]">
+                              {t('support.feedbackDescription')}
+                            </p>
+                          </div>
+                        </div>
+
+                        <motion.button
+                          type="button"
+                          whileHover={{ y: -2 }}
+                          whileTap={{ y: 1 }}
+                          onClick={() => {
+                            playSfx('CLICK')
+                            window.open(SUPPORT_FEEDBACK_URL, '_blank', 'noopener,noreferrer')
+                          }}
+                          className="mt-4 app-primary-btn w-full rounded-xl px-4 py-3 text-white shadow-[0_14px_30px_rgba(76,53,184,0.26)]"
+                          style={{
+                            boxShadow: '0 14px 30px rgba(76,53,184,0.26), 0 0 22px rgba(111,76,230,0.14)',
+                          }}
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            <motion.span
+                              animate={{ y: [0, -1.5, 0] }}
+                              transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                              className="inline-flex"
+                            >
+                              <MessageCircleMore size={16} />
+                            </motion.span>
+                            <span className="pixel-text text-[8px] uppercase">{t('support.feedbackButton')}</span>
+                          </span>
+                        </motion.button>
                       </div>
                     </div>
                   </div>
