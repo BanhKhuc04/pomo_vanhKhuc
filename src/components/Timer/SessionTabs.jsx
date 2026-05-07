@@ -5,7 +5,7 @@ import clsx from 'clsx'
 import { getModeLabel } from '../../data/translations'
 
 export default function SessionTabs() {
-  const { mode, switchMode, locale, t } = usePomo()
+  const { mode, switchMode, locale, playHoverSfx, t } = usePomo()
   const tabs = [
     { mode: MODES.FOCUS, emoji: '🍅' },
     { mode: MODES.SHORT_BREAK, emoji: '☕' },
@@ -20,6 +20,7 @@ export default function SessionTabs() {
           <button
             key={tab.mode}
             onClick={() => switchMode(tab.mode)}
+            onMouseEnter={playHoverSfx}
             aria-label={t('timer.switchTo', { mode: getModeLabel(locale, tab.mode) })}
             className={clsx(
               'session-tab-btn pixel-text text-[9px] sm:text-[10px] flex items-center justify-center gap-1.5 px-3 py-3 border rounded-xl uppercase transition-all whitespace-nowrap min-w-0',

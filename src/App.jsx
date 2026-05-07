@@ -25,6 +25,7 @@ import AchievementsModal from './components/Stats/AchievementsModal'
 // Settings modal
 import SettingsModal from './components/Settings/SettingsModal'
 import SupportModal, { SupportFloatingButton } from './components/Support/SupportModal'
+import YouTubeMusicBridge from './components/Audio/YouTubeMusicBridge'
 
 // UI
 import PixelToastContainer from './components/UI/PixelToast'
@@ -217,6 +218,7 @@ function AppShell() {
       />
       <AchievementsModal isOpen={achievementsOpen} onClose={() => setAchievementsOpen(false)} />
       <SupportModal isOpen={supportOpen} onClose={() => setSupportOpen(false)} />
+      <YouTubeMusicBridge />
       <PixelToastContainer />
     </>
   )

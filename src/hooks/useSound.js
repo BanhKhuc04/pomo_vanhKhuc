@@ -1,87 +1,32 @@
-import { useEffect, useRef, useCallback } from 'react'
-import { Howl } from 'howler'
-import { SOUNDS, SOUND_CONFIG } from '../data/sounds'
+import { useEffect } from 'react'
+import { soundManager } from '../utils/soundManager'
 
-/**
- * useSound - centralized audio management with Howler.js
- * Sound files are optional - missing files won't crash app.
- */
-export default function useSound({ musicVolume = 0.4, sfxVolume = 0.6, muted = false } = {}) {
-  const soundsRef = useRef({})
-
-  // Init all sounds once
+export default function useSound({
+  masterVolume = 0.35,
+  sfxVolume = 1,
+  muted = false,
+  soundEnabled = true,
+} = {}) {
   useEffect(() => {
-    Object.entries(SOUNDS).forEach(([key, src]) => {
-      const cfg = SOUND_CONFIG[key] || {}
-      try {
-        soundsRef.current[key] = new Howl({
-          src: [src],
-          loop: cfg.loop || false,
-          volume: cfg.volume || 0.5,
-          html5: cfg.isMusic || false,
-          preload: true,
-          onloaderror: () => {
-            // silent: file missing is OK
-          },
-          onplayerror: () => {
-            // try unlock on user interaction
-            try {
-              soundsRef.current[key]?.once('unlock', () => {
-                soundsRef.current[key]?.play()
-              })
-            } catch (e) {}
-          }
-        })
-      } catch (e) {
-        // ignore
-      }
-    })
-
+    soundManager.init()
     return () => {
-      Object.values(soundsRef.current).forEach(s => {
-        try { s.stop(); s.unload() } catch (e) {}
-      })
-      soundsRef.current = {}
+      soundManager.dispose()
     }
   }, [])
 
-  // Update volumes when changed
   useEffect(() => {
-    Object.entries(soundsRef.current).forEach(([key, sound]) => {
-      const cfg = SOUND_CONFIG[key] || {}
-      const baseVol = cfg.volume || 0.5
-      const scale = cfg.isMusic ? musicVolume : sfxVolume
-      try { sound.volume(muted ? 0 : baseVol * scale * 2) } catch (e) {}
+    soundManager.updateSettings({
+      masterVolume,
+      sfxVolume,
+      muted,
+      soundEnabled,
     })
-  }, [musicVolume, sfxVolume, muted])
+  }, [masterVolume, sfxVolume, muted, soundEnabled])
 
-  const play = useCallback((key) => {
-    if (muted) return
-    const s = soundsRef.current[key]
-    if (!s) return
-    try {
-      if (!s.playing()) s.play()
-      else if (!SOUND_CONFIG[key]?.loop) s.play() // allow overlap for sfx
-    } catch (e) {}
-  }, [muted])
-
-  const stop = useCallback((key) => {
-    const s = soundsRef.current[key]
-    if (!s) return
-    try { s.stop() } catch (e) {}
-  }, [])
-
-  const stopAll = useCallback(() => {
-    Object.values(soundsRef.current).forEach(s => {
-      try { s.stop() } catch (e) {}
-    })
-  }, [])
-
-  const isPlaying = useCallback((key) => {
-    const s = soundsRef.current[key]
-    if (!s) return false
-    try { return s.playing() } catch (e) { return false }
-  }, [])
-
-  return { play, stop, stopAll, isPlaying }
+  return {
+    play: soundManager.play.bind(soundManager),
+    stop: soundManager.stop.bind(soundManager),
+    stopAll: soundManager.stopAll.bind(soundManager),
+    isPlaying: soundManager.isPlaying.bind(soundManager),
+  }
 }

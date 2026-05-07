@@ -8,11 +8,12 @@ const SUPPORT_BANNER_SRC = '/images/support/thankyou.png'
 const SUPPORT_FEEDBACK_URL = 'https://forms.gle/25Qn8ho3WeK41k1d6'
 
 export function SupportFloatingButton({ onClick }) {
-  const { t, playSfx } = usePomo()
+  const { t, playSfx, playHoverSfx } = usePomo()
 
   return (
     <button
       type="button"
+      onMouseEnter={playHoverSfx}
       onClick={() => {
         playSfx('CLICK')
         onClick?.()
@@ -30,7 +31,7 @@ export function SupportFloatingButton({ onClick }) {
 }
 
 export default function SupportModal({ isOpen, onClose }) {
-  const { t, playSfx } = usePomo()
+  const { t, playSfx, playHoverSfx } = usePomo()
 
   return (
     <AnimatePresence>
@@ -214,6 +215,7 @@ export default function SupportModal({ isOpen, onClose }) {
 
                         <motion.button
                           type="button"
+                          onMouseEnter={playHoverSfx}
                           whileHover={{ y: -2 }}
                           whileTap={{ y: 1 }}
                           onClick={() => {
@@ -254,6 +256,7 @@ export default function SupportModal({ isOpen, onClose }) {
                   color: '#F3EEFF',
                 }}
                 onMouseEnter={(event) => {
+                  playHoverSfx()
                   event.currentTarget.style.background = 'rgba(247,185,74,0.18)'
                   event.currentTarget.style.borderColor = 'rgba(247,185,74,0.62)'
                   event.currentTarget.style.color = '#FFD67A'

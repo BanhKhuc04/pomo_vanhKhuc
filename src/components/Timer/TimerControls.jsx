@@ -4,7 +4,7 @@ import { usePomo } from '../../context/PomoContext'
 import clsx from 'clsx'
 
 export default function TimerControls() {
-  const { isRunning, toggleTimer, resetTimer, t } = usePomo()
+  const { isRunning, toggleTimer, resetTimer, playHoverSfx, t } = usePomo()
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -24,6 +24,7 @@ export default function TimerControls() {
       {/* START / PAUSE — main CTA */}
       <button
         onClick={toggleTimer}
+        onMouseEnter={playHoverSfx}
         aria-label={isRunning ? t('timer.pause') : t('timer.start')}
         className={clsx(
           'timer-control-btn pixel-text text-[10px] sm:text-[11px] flex items-center justify-center gap-2 py-3.5 rounded-xl uppercase w-full flex-[1.25]',
@@ -40,6 +41,7 @@ export default function TimerControls() {
       {/* RESET — secondary */}
       <button
         onClick={resetTimer}
+        onMouseEnter={playHoverSfx}
         aria-label={t('timer.reset')}
         className={clsx(
           'timer-control-btn pixel-text text-[10px] sm:text-[11px] flex items-center justify-center gap-2 py-3.5 rounded-xl uppercase flex-1',

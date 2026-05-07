@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import useLocalStorage from '../hooks/useLocalStorage'
 import useTimer from '../hooks/useTimer'
 import useTheme from '../hooks/useTheme'
@@ -32,8 +32,16 @@ export function PomoProvider({ children }) {
   const [garden, setGarden] = useLocalStorage(STORAGE_KEYS.GARDEN, initialGarden())
   const [mode, setMode] = useState(MODES.FOCUS)
   const [completedFocusInCycle, setCompletedFocusInCycle] = useState(0)
-  const [muted, setMuted] = useState(false)
   const [toasts, setToasts] = useState([])
+  const [autoResumeToken, setAutoResumeToken] = useState(0)
+  const [musicResetSignal, setMusicResetSignal] = useState(0)
+  const [customMusicAction, setCustomMusicAction] = useState(null)
+  const [customMusicRuntime, setCustomMusicRuntime] = useState({
+    status: 'idle',
+    title: '',
+    error: '',
+    needsInteraction: false,
+  })
 
   const settings = normalizeSettings(settingsRaw)
   const t = useMemo(() => createTranslator(settings.locale), [settings.locale])
@@ -49,9 +57,10 @@ export function PomoProvider({ children }) {
 
   const theme = useTheme(settings.themeMode)
   const sound = useSound({
-    musicVolume: settings.musicVolume,
+    masterVolume: settings.masterVolume,
     sfxVolume: settings.sfxVolume,
-    muted
+    muted: settings.muted,
+    soundEnabled: settings.soundEnabled,
   })
   const streakHook = useStreak()
   const achievementsHook = useAchievements()
@@ -134,9 +143,7 @@ export function PomoProvider({ children }) {
   // Handle session completion
   const handleComplete = useCallback(() => {
     const finishedMode = mode
-    sound.stop('LOFI_BG')
-    sound.stop('TICK')
-    sound.play('BELL')
+    sound.play('COMPLETE')
 
     if (finishedMode === MODES.FOCUS) {
       const focusMinutes = settings.durations[MODES.FOCUS] || 25
@@ -234,6 +241,9 @@ export function PomoProvider({ children }) {
         )
       }
 
+      if (settings.autoCycleEnabled) {
+        setAutoResumeToken(prev => prev + 1)
+      }
       setMode(next)
     } else {
       // Break finished
@@ -245,20 +255,29 @@ export function PomoProvider({ children }) {
       if (settings.notificationsEnabled) {
         notify(t('notifications.breakOverTitle'), t('notifications.breakOverMessage'))
       }
+      if (settings.autoCycleEnabled) {
+        setAutoResumeToken(prev => prev + 1)
+      }
       setMode(MODES.FOCUS)
     }
   }, [mode, settings, stats, sound, completedFocusInCycle, getNextMode, setStats, setGarden, streakHook, achievementsHook, pushToast, activeTaskId, setTasks, setDailyStats, t])
 
   // Tick handler (optional tick sound)
   const handleTick = useCallback((secondsLeft) => {
-    if (settings.tickEnabled && mode === MODES.FOCUS) {
-      sound.play('TICK')
-    }
     // Update tab title
     document.title = `${formatTime(secondsLeft)} • ${getModeLabel(settings.locale, mode)} • ${settings.appName || DEFAULT_APP_NAME}`
-  }, [settings.tickEnabled, mode, sound, settings.appName, settings.locale])
+  }, [mode, settings.appName, settings.locale])
 
   const timer = useTimer(currentDurationSec, handleComplete, handleTick)
+
+  useEffect(() => {
+    if (!settings.autoCycleEnabled || autoResumeToken === 0) return
+    if (timer.isRunning) return
+    const id = window.setTimeout(() => {
+      timer.start()
+    }, 80)
+    return () => window.clearTimeout(id)
+  }, [autoResumeToken, settings.autoCycleEnabled, timer, mode, currentDurationSec])
 
   // Reset title on stop
   useEffect(() => {
@@ -267,48 +286,47 @@ export function PomoProvider({ children }) {
     }
   }, [timer.isRunning, settings.appName])
 
-  // Handle music start/stop based on mode + running state
-  useEffect(() => {
-    if (timer.isRunning && mode === MODES.FOCUS) {
-      sound.play('LOFI_BG')
-    } else {
-      sound.stop('LOFI_BG')
-    }
-    if (!timer.isRunning) sound.stop('TICK')
-  }, [timer.isRunning, mode, sound])
-
   // Switch mode (resets timer to that mode's duration)
   const switchMode = useCallback((newMode) => {
     sound.play('CLICK')
-    sound.stop('LOFI_BG')
+    setAutoResumeToken(0)
     setMode(newMode)
   }, [sound])
 
   // Wrapped controls with sound effects
   const startTimer = useCallback(() => {
-    sound.play('CLICK')
+    sound.play('START')
+    setAutoResumeToken(0)
     timer.start()
   }, [timer, sound])
 
   const pauseTimer = useCallback(() => {
-    sound.play('CLICK')
+    sound.play('PAUSE')
+    setAutoResumeToken(0)
     timer.pause()
   }, [timer, sound])
 
   const resetTimer = useCallback(() => {
-    sound.play('CLICK')
+    sound.play('RESET')
+    setAutoResumeToken(0)
+    setMusicResetSignal(prev => prev + 1)
     timer.reset()
   }, [timer, sound])
 
   const toggleTimer = useCallback(() => {
-    sound.play('CLICK')
-    timer.toggle()
+    if (timer.isRunning) {
+      sound.play('PAUSE')
+      setAutoResumeToken(0)
+      timer.pause()
+      return
+    }
+    sound.play('START')
+    setAutoResumeToken(0)
+    timer.start()
   }, [timer, sound])
 
   // Reset all data
   const resetAllData = useCallback(() => {
-    sound.stop('LOFI_BG')
-    sound.stop('TICK')
     updateSettings(DEFAULT_SETTINGS)
     setStats(DEFAULT_STATS)
     setGarden(initialGarden())
@@ -316,15 +334,16 @@ export function PomoProvider({ children }) {
     setDailyStats({})
     setActiveTaskId(null)
     setProfileRaw(null)
-    setMuted(false)
     setSessionJustCompleted(false)
     streakHook.resetStreak()
     achievementsHook.resetAchievements()
     setCompletedFocusInCycle(0)
+    setAutoResumeToken(0)
+    setMusicResetSignal(prev => prev + 1)
     setMode(MODES.FOCUS)
     timer.reset()
     pushToast({ type: 'info', title: t('toasts.resetCompleteTitle'), message: t('toasts.resetCompleteMessage') })
-  }, [updateSettings, setStats, setGarden, setTasks, setDailyStats, streakHook, achievementsHook, pushToast, t, sound, timer, setProfileRaw])
+  }, [updateSettings, setStats, setGarden, setTasks, setDailyStats, streakHook, achievementsHook, pushToast, t, timer, setProfileRaw])
 
   const addTask = useCallback((text) => {
     if (!text.trim()) return
@@ -337,7 +356,7 @@ export function PomoProvider({ children }) {
     }
     setTasks(prev => [newTask, ...prev])
     sound.play('CLICK')
-  }, [setTasks, sound.play])
+  }, [setTasks, sound])
 
   const toggleTask = useCallback((id) => {
     setTasks(prev => prev.map(t => {
@@ -367,13 +386,13 @@ export function PomoProvider({ children }) {
       return t;
     }))
     sound.play('CLICK')
-  }, [setTasks, sound.play, activeTaskId, setDailyStats])
+  }, [setTasks, sound, activeTaskId, setDailyStats])
 
   const deleteTask = useCallback((id) => {
     if (activeTaskId === id) setActiveTaskId(null);
     setTasks(prev => prev.filter(t => t.id !== id))
     sound.play('CLICK')
-  }, [setTasks, sound.play, activeTaskId])
+  }, [setTasks, sound, activeTaskId])
 
   const value = {
     // tasks
@@ -401,7 +420,24 @@ export function PomoProvider({ children }) {
     totalSeconds: currentDurationSec,
     startTimer, pauseTimer, resetTimer, toggleTimer,
     // sound
-    muted, setMuted, playSfx: sound.play,
+    muted: settings.muted,
+    setMuted: (nextMuted) => updateSettings(prev => ({
+      ...prev,
+      muted: typeof nextMuted === 'function' ? Boolean(nextMuted(prev.muted)) : Boolean(nextMuted),
+    })),
+    soundEnabled: settings.soundEnabled,
+    setSoundEnabled: (nextEnabled) => updateSettings(prev => ({
+      ...prev,
+      soundEnabled: typeof nextEnabled === 'function' ? Boolean(nextEnabled(prev.soundEnabled)) : Boolean(nextEnabled),
+    })),
+    playSfx: sound.play,
+    playHoverSfx: () => sound.play('HOVER'),
+    customMusicRuntime,
+    setCustomMusicRuntime,
+    previewCustomMusic: () => setCustomMusicAction({ type: 'preview', at: Date.now() }),
+    stopCustomMusic: () => setCustomMusicAction({ type: 'stop', at: Date.now() }),
+    customMusicAction,
+    musicResetSignal,
     // theme
     theme: theme.theme,
     resolvedTheme: theme.resolvedTheme,

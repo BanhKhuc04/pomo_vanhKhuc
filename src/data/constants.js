@@ -48,8 +48,16 @@ export const DEFAULT_SETTINGS = {
   themeMode: THEME_MODES.DARK,
   locale: APP_LANGUAGES.EN,
   durations: { ...DEFAULT_DURATIONS },
-  musicVolume: 0.5,
-  sfxVolume: 0.7,
+  masterVolume: 0.35,
+  sfxVolume: 1,
+  soundEnabled: true,
+  muted: false,
+  autoCycleEnabled: false,
+  customMusicEnabled: false,
+  customMusicType: '',
+  customMusicUrl: '',
+  customVideoId: '',
+  customPlaylistId: '',
   tickEnabled: false,
   autoDarkMode: true,
   notificationsEnabled: true,
@@ -68,12 +76,26 @@ export function normalizeSettings(raw) {
     ? source.appName.trim().slice(0, 36)
     : DEFAULT_APP_NAME
 
+  const numberOr = (value, fallback) => {
+    return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+  }
+
   return {
     ...DEFAULT_SETTINGS,
     ...source,
     appName,
     themeMode,
     locale,
+    masterVolume: Math.min(1, Math.max(0, numberOr(source.masterVolume, DEFAULT_SETTINGS.masterVolume))),
+    sfxVolume: Math.min(1, Math.max(0, numberOr(source.sfxVolume, DEFAULT_SETTINGS.sfxVolume))),
+    soundEnabled: source.soundEnabled !== undefined ? Boolean(source.soundEnabled) : DEFAULT_SETTINGS.soundEnabled,
+    muted: source.muted !== undefined ? Boolean(source.muted) : DEFAULT_SETTINGS.muted,
+    autoCycleEnabled: source.autoCycleEnabled !== undefined ? Boolean(source.autoCycleEnabled) : DEFAULT_SETTINGS.autoCycleEnabled,
+    customMusicEnabled: source.customMusicEnabled !== undefined ? Boolean(source.customMusicEnabled) : DEFAULT_SETTINGS.customMusicEnabled,
+    customMusicType: typeof source.customMusicType === 'string' ? source.customMusicType : DEFAULT_SETTINGS.customMusicType,
+    customMusicUrl: typeof source.customMusicUrl === 'string' ? source.customMusicUrl.trim() : DEFAULT_SETTINGS.customMusicUrl,
+    customVideoId: typeof source.customVideoId === 'string' ? source.customVideoId.trim() : DEFAULT_SETTINGS.customVideoId,
+    customPlaylistId: typeof source.customPlaylistId === 'string' ? source.customPlaylistId.trim() : DEFAULT_SETTINGS.customPlaylistId,
     durations: {
       ...DEFAULT_DURATIONS,
       ...(source.durations || {}),

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Bell, Languages, Palette, RotateCcw, Timer, User, Volume2, X } from 'lucide-react'
+import { Bell, Languages, Palette, Play, RotateCcw, Square, Timer, Trash2, User, Volume2, X } from 'lucide-react'
 import { usePomo } from '../../context/PomoContext'
 import { DEFAULT_APP_NAME, DEFAULT_DURATIONS, DEFAULT_SETTINGS, LANGUAGE_OPTIONS, MODES, THEME_MODES } from '../../data/constants'
 import { createTranslator, getModeLabel } from '../../data/translations'
 import { clamp } from '../../utils/helpers'
+import { parseYouTubeMusicUrl } from '../../utils/youtube'
 import UserAvatar from '../Profile/UserAvatar'
 
 const DURATION_PRESETS = [
@@ -125,22 +126,24 @@ function GoogleIcon({ className = 'h-4 w-4' }) {
 }
 
 export default function SettingsModal({ isOpen, onClose, onOpenProfile }) {
-  const { settings, setSettings, resetAllData, muted, setMuted, profile, playSfx, pushToast } = usePomo()
+  const {
+    settings, setSettings, resetAllData, profile, playSfx, playHoverSfx, pushToast,
+    previewCustomMusic, stopCustomMusic, customMusicRuntime,
+  } = usePomo()
   const [confirmReset, setConfirmReset] = useState(false)
   const [draftSettings, setDraftSettings] = useState(settings)
-  const [draftMuted, setDraftMuted] = useState(muted)
   const [durationPreset, setDurationPreset] = useState(getPresetFromDurations(settings.durations))
   const [accountChoice, setAccountChoice] = useState('guest')
   const t = createTranslator(draftSettings.locale)
+  const parsedMusic = parseYouTubeMusicUrl(draftSettings.customMusicUrl)
 
   useEffect(() => {
     if (!isOpen) return
     setDraftSettings(settings)
-    setDraftMuted(muted)
     setDurationPreset(getPresetFromDurations(settings.durations))
     setAccountChoice('guest')
     setConfirmReset(false)
-  }, [isOpen, settings, muted])
+  }, [isOpen, settings])
 
   useEffect(() => {
     if (!isOpen) return
@@ -185,9 +188,128 @@ export default function SettingsModal({ isOpen, onClose, onOpenProfile }) {
   }
 
   const handleSave = () => {
-    setSettings(draftSettings)
-    setMuted(draftMuted)
+    const resolvedMusicSettings = (() => {
+      if (!draftSettings.customMusicUrl.trim()) {
+        return {
+          customMusicEnabled: false,
+          customMusicType: '',
+          customMusicUrl: '',
+          customVideoId: '',
+          customPlaylistId: '',
+        }
+      }
+
+      if (parsedMusic.isValid) {
+        return {
+          customMusicEnabled: draftSettings.customMusicEnabled,
+          customMusicType: parsedMusic.type,
+          customMusicUrl: parsedMusic.canonicalUrl,
+          customVideoId: parsedMusic.videoId,
+          customPlaylistId: parsedMusic.playlistId,
+        }
+      }
+
+      return {
+        customMusicEnabled: false,
+        customMusicType: '',
+        customMusicUrl: draftSettings.customMusicUrl,
+        customVideoId: '',
+        customPlaylistId: '',
+      }
+    })()
+
+    setSettings({
+      ...draftSettings,
+      ...resolvedMusicSettings,
+    })
     onClose?.()
+  }
+
+  const handleSaveCustomMusic = () => {
+    if (!draftSettings.customMusicUrl.trim()) {
+      const next = {
+        ...draftSettings,
+        customMusicEnabled: false,
+        customMusicType: '',
+        customMusicUrl: '',
+        customVideoId: '',
+        customPlaylistId: '',
+      }
+      setDraftSettings(next)
+      setSettings(prev => ({
+        ...prev,
+        customMusicEnabled: false,
+        customMusicType: '',
+        customMusicUrl: '',
+        customVideoId: '',
+        customPlaylistId: '',
+      }))
+      stopCustomMusic()
+      pushToast({
+        type: 'info',
+        title: t('settings.customMusicCleared'),
+        message: t('settings.customMusicClearedHelp'),
+      })
+      return
+    }
+
+    if (!parsedMusic.isValid) {
+      pushToast({
+        type: 'warning',
+        title: t('settings.customMusicInvalid'),
+        message: t('settings.customMusicSubtitle'),
+      })
+      return
+    }
+
+    const next = {
+      ...draftSettings,
+      customMusicEnabled: true,
+      customMusicType: parsedMusic.type,
+      customMusicUrl: parsedMusic.canonicalUrl,
+      customVideoId: parsedMusic.videoId,
+      customPlaylistId: parsedMusic.playlistId,
+    }
+    setDraftSettings(next)
+    setSettings(prev => ({
+      ...prev,
+      customMusicEnabled: true,
+      customMusicType: parsedMusic.type,
+      customMusicUrl: parsedMusic.canonicalUrl,
+      customVideoId: parsedMusic.videoId,
+      customPlaylistId: parsedMusic.playlistId,
+    }))
+    pushToast({
+      type: 'success',
+      title: t('settings.customMusicSaved'),
+      message: t('settings.customMusicSavedHelp'),
+    })
+  }
+
+  const handleClearCustomMusic = () => {
+    const next = {
+      ...draftSettings,
+      customMusicEnabled: false,
+      customMusicType: '',
+      customMusicUrl: '',
+      customVideoId: '',
+      customPlaylistId: '',
+    }
+    setDraftSettings(next)
+    setSettings(prev => ({
+      ...prev,
+      customMusicEnabled: false,
+      customMusicType: '',
+      customMusicUrl: '',
+      customVideoId: '',
+      customPlaylistId: '',
+    }))
+    stopCustomMusic()
+    pushToast({
+      type: 'info',
+      title: t('settings.customMusicCleared'),
+      message: t('settings.customMusicClearedHelp'),
+    })
   }
 
   const handleResetDefaults = () => {
@@ -196,7 +318,6 @@ export default function SettingsModal({ isOpen, onClose, onOpenProfile }) {
       appName: DEFAULT_APP_NAME,
       durations: { ...DEFAULT_DURATIONS }
     })
-    setDraftMuted(false)
     setDurationPreset('classic')
   }
 
@@ -267,16 +388,102 @@ export default function SettingsModal({ isOpen, onClose, onOpenProfile }) {
                   subtitle={t('settings.soundSubtitle')}
                 >
                   <SliderRow
-                    label={t('settings.musicVolume')}
-                    value={Math.round(draftSettings.musicVolume * 100)}
-                    onChange={v => updateField('musicVolume', v / 100)}
+                    label={t('settings.masterVolume')}
+                    value={Math.round(draftSettings.masterVolume * 100)}
+                    onChange={v => updateField('masterVolume', v / 100)}
                   />
                   <SliderRow
                     label={t('settings.sfxVolume')}
                     value={Math.round(draftSettings.sfxVolume * 100)}
                     onChange={v => updateField('sfxVolume', v / 100)}
                   />
-                  <ToggleRow label={t('settings.muteAll')} checked={draftMuted} onChange={setDraftMuted} />
+                  <ToggleRow label={t('settings.soundEnabled')} checked={draftSettings.soundEnabled} onChange={v => updateField('soundEnabled', v)} />
+                  <ToggleRow label={t('settings.muteAll')} checked={draftSettings.muted} onChange={v => updateField('muted', v)} />
+
+                  <div className="rounded-2xl border p-3" style={{ borderColor: 'var(--app-card-border)', background: 'linear-gradient(180deg, rgba(39,29,88,0.3) 0%, rgba(23,18,56,0.62) 100%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+                    <div className="mb-3">
+                      <div className="pixel-text text-[8px] uppercase tracking-[0.1em] app-main-text">{t('settings.customMusicTitle')}</div>
+                      <p className="retro-text text-[15px] leading-[1.18] app-muted mt-1">{t('settings.customMusicSubtitle')}</p>
+                    </div>
+
+                    <ToggleRow
+                      label={t('settings.customMusicEnabled')}
+                      checked={draftSettings.customMusicEnabled}
+                      onChange={(value) => updateField('customMusicEnabled', value)}
+                    />
+
+                    <input
+                      type="text"
+                      value={draftSettings.customMusicUrl}
+                      onChange={(event) => updateField('customMusicUrl', event.target.value)}
+                      placeholder={t('settings.customMusicPlaceholder')}
+                      className="app-input w-full rounded-xl px-4 py-3 outline-none"
+                    />
+
+                    <div className="mt-2.5 rounded-xl border px-3 py-2.5" style={{ borderColor: parsedMusic.isValid ? 'rgba(126,247,123,0.28)' : 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
+                      <div className="pixel-text text-[8px] uppercase app-kicker">
+                        {customMusicRuntime.title || (parsedMusic.type === 'playlist' ? t('settings.customMusicPlaylistLabel') : 'YouTube Video')}
+                      </div>
+                      <p className="retro-text mt-1 text-[14px] leading-[1.22] app-muted">
+                        {draftSettings.customMusicUrl.trim()
+                          ? parsedMusic.isValid ? t('settings.customMusicValid') : t('settings.customMusicInvalid')
+                          : t('settings.customMusicSubtitle')}
+                      </p>
+                      {customMusicRuntime.needsInteraction ? (
+                        <p className="retro-text mt-1 text-[14px] leading-none" style={{ color: 'var(--app-warm)' }}>
+                          {t('settings.customMusicNeedsInteraction')}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      <button type="button" onMouseEnter={playHoverSfx} onClick={handleSaveCustomMusic} className="app-primary-btn rounded-xl px-3 py-2.5">
+                        <span className="pixel-text text-[8px] uppercase">{t('settings.customMusicSave')}</span>
+                      </button>
+                      <button type="button" onMouseEnter={playHoverSfx} onClick={handleClearCustomMusic} className="app-secondary-btn rounded-xl px-3 py-2.5 flex items-center justify-center gap-2">
+                        <Trash2 size={14} />
+                        <span className="pixel-text text-[8px] uppercase">{t('settings.customMusicClear')}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onMouseEnter={playHoverSfx}
+                        onClick={() => {
+                          if (parsedMusic.isValid) {
+                            const next = {
+                              ...draftSettings,
+                              customMusicEnabled: true,
+                              customMusicType: parsedMusic.type,
+                              customMusicUrl: parsedMusic.canonicalUrl,
+                              customVideoId: parsedMusic.videoId,
+                              customPlaylistId: parsedMusic.playlistId,
+                            }
+                            setDraftSettings(next)
+                            setSettings(prev => ({
+                              ...prev,
+                              customMusicEnabled: true,
+                              customMusicType: parsedMusic.type,
+                              customMusicUrl: parsedMusic.canonicalUrl,
+                              customVideoId: parsedMusic.videoId,
+                              customPlaylistId: parsedMusic.playlistId,
+                            }))
+                            previewCustomMusic()
+                            return
+                          }
+                          if (draftSettings.customVideoId || draftSettings.customPlaylistId) {
+                            previewCustomMusic()
+                          }
+                        }}
+                        className="app-secondary-btn rounded-xl px-3 py-2.5 flex items-center justify-center gap-2"
+                      >
+                        <Play size={14} />
+                        <span className="pixel-text text-[8px] uppercase">{t('settings.customMusicPreview')}</span>
+                      </button>
+                      <button type="button" onMouseEnter={playHoverSfx} onClick={stopCustomMusic} className="app-secondary-btn rounded-xl px-3 py-2.5 flex items-center justify-center gap-2">
+                        <Square size={13} />
+                        <span className="pixel-text text-[8px] uppercase">{t('settings.customMusicStop')}</span>
+                      </button>
+                    </div>
+                  </div>
                 </SectionCard>
 
                 <SectionCard
@@ -360,6 +567,7 @@ export default function SettingsModal({ isOpen, onClose, onOpenProfile }) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <button
                       type="button"
+                      onMouseEnter={playHoverSfx}
                       onClick={handleGoogleIntent}
                       className="app-primary-btn rounded-xl px-3 py-2.5 text-left"
                     >
@@ -371,6 +579,7 @@ export default function SettingsModal({ isOpen, onClose, onOpenProfile }) {
                     </button>
                     <button
                       type="button"
+                      onMouseEnter={playHoverSfx}
                       onClick={handleStayGuest}
                       className="app-secondary-btn rounded-xl px-3 py-2.5 text-left"
                     >
@@ -410,6 +619,7 @@ export default function SettingsModal({ isOpen, onClose, onOpenProfile }) {
                   <DurationStepper label={getModeLabel(draftSettings.locale, MODES.FOCUS)} emoji="🍅" value={draftSettings.durations[MODES.FOCUS]} onChange={v => updateDuration(MODES.FOCUS, v)} unitLabel={t('common.minuteUnit')} />
                   <DurationStepper label={getModeLabel(draftSettings.locale, MODES.SHORT_BREAK)} emoji="☕" value={draftSettings.durations[MODES.SHORT_BREAK]} onChange={v => updateDuration(MODES.SHORT_BREAK, v)} unitLabel={t('common.minuteUnit')} />
                   <DurationStepper label={getModeLabel(draftSettings.locale, MODES.LONG_BREAK)} emoji="😴" value={draftSettings.durations[MODES.LONG_BREAK]} onChange={v => updateDuration(MODES.LONG_BREAK, v)} unitLabel={t('common.minuteUnit')} />
+                  <ToggleRow label={t('settings.autoCycleTitle')} checked={draftSettings.autoCycleEnabled} onChange={v => updateField('autoCycleEnabled', v)} />
                 </SectionCard>
 
                 <SectionCard
@@ -428,6 +638,7 @@ export default function SettingsModal({ isOpen, onClose, onOpenProfile }) {
                 >
                   <button
                     type="button"
+                    onMouseEnter={playHoverSfx}
                     onClick={() => {
                       onClose?.()
                       onOpenProfile?.()
@@ -446,6 +657,7 @@ export default function SettingsModal({ isOpen, onClose, onOpenProfile }) {
                 >
                   <button
                     type="button"
+                    onMouseEnter={playHoverSfx}
                     onClick={handleResetDefaults}
                     className="app-secondary-btn w-full rounded-xl px-3 py-2.5 text-left"
                   >
@@ -455,6 +667,7 @@ export default function SettingsModal({ isOpen, onClose, onOpenProfile }) {
 
                   <button
                     type="button"
+                    onMouseEnter={playHoverSfx}
                     onClick={handleReset}
                     className="w-full rounded-xl border px-3 py-2.5 text-left"
                     style={{
@@ -472,14 +685,14 @@ export default function SettingsModal({ isOpen, onClose, onOpenProfile }) {
             </div>
 
             <div className="app-footer-bar px-5 py-4 flex flex-wrap items-center justify-end gap-3">
-              <button type="button" onClick={handleResetDefaults} className="app-secondary-btn rounded-xl px-4 py-2 pixel-text text-[8px] uppercase flex items-center gap-2">
+              <button type="button" onMouseEnter={playHoverSfx} onClick={handleResetDefaults} className="app-secondary-btn rounded-xl px-4 py-2 pixel-text text-[8px] uppercase flex items-center gap-2">
                 <RotateCcw size={14} />
                 {t('settings.footerResetDefaults')}
               </button>
-              <button type="button" onClick={onClose} className="app-secondary-btn rounded-xl px-4 py-2 pixel-text text-[8px] uppercase">
+              <button type="button" onMouseEnter={playHoverSfx} onClick={onClose} className="app-secondary-btn rounded-xl px-4 py-2 pixel-text text-[8px] uppercase">
                 {t('common.cancel')}
               </button>
-              <button type="button" onClick={handleSave} className="app-primary-btn rounded-xl px-5 py-2 pixel-text text-[8px] uppercase">
+              <button type="button" onMouseEnter={playHoverSfx} onClick={handleSave} className="app-primary-btn rounded-xl px-5 py-2 pixel-text text-[8px] uppercase">
                 {t('common.save')}
               </button>
             </div>
